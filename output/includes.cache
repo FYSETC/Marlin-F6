@@ -1,0 +1,337 @@
+[
+  {
+    "Sourcefile": "",
+    "Include": "",
+    "Includepath": "C:\\Users\\George\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.6.23\\cores\\arduino"
+  },
+  {
+    "Sourcefile": "",
+    "Include": "",
+    "Includepath": "C:\\Users\\George\\AppData\\Local\\Arduino15\\packages\\fysetcf6\\hardware\\avr\\1.3.0\\variants\\fysetcf6"
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Marlin.ino.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\FysTLcd.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\G26_Mesh_Validation_Tool.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\I2CPositionEncoder.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\M100_Free_Mem_Chk.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\MarlinSerial.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Marlin_main.cpp",
+    "Include": "TMC2130Stepper.h",
+    "Includepath": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src"
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Marlin_main.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Max7219_Debug_LEDs.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Sd2Card.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\SdBaseFile.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\SdFatUtil.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\SdFile.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\SdVolume.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\blinkm.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\cardreader.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\configuration_store.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\dac_mcp4728.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\digipot_mcp4018.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\digipot_mcp4451.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\emergency_parser.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\endstops.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\fwretract.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\hex_print_routines.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\least_squares_fit.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\leds.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\malyanlcd.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\mesh_bed_leveling.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\neopixel.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\nozzle.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\parser.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\pca9632.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\planner.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\planner_bezier.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\power.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\power_loss_recovery.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\printcounter.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\runout.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\serial.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\servo.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\stepper_dac.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\stepper_indirection.cpp",
+    "Include": "SPI.h",
+    "Includepath": "C:\\Users\\George\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.6.23\\libraries\\SPI\\src"
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\stepper_indirection.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\stopwatch.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\temperature.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\tmc_util.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\twibus.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\ubl.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\ubl_G29.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\ubl_motion.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\ultralcd.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\ultralcd_FysTLcdLib.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\utility.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\vector_3.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\watchdog.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\SW_SPI.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_CHOPCONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_COOLCONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_DRV_STATUS.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_GCONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_IHOLD_IRUN.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_PWMCONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "C:\\Users\\George\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.6.23\\libraries\\SPI\\src\\SPI.cpp",
+    "Include": "",
+    "Includepath": ""
+  }
+]
