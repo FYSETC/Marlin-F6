@@ -37,12 +37,12 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V55"
+#define EEPROM_VERSION "V56"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
 // Can be disabled for production build.
-//#define DEBUG_EEPROM_READWRITE
+#define DEBUG_EEPROM_READWRITE
 
 #include "configuration_store.h"
 #include "Marlin.h"
@@ -79,6 +79,11 @@
 
 #pragma pack(push, 1) // No padding between variables
 
+//typedef struct { uint16_t X, Y, Z, X2, Y2, Z2, Z3, E0, E1, E2, E3, E4, E5; } tmc_stepper_current_t;
+//typedef struct { uint32_t X, Y, Z, X2, Y2, Z2, Z3, E0, E1, E2, E3, E4, E5; } tmc_hybrid_threshold_t;
+typedef struct { uint16_t X, Y, Z, X2, Y2, Z2, E0, E1, E2, E3, E4; } tmc_stepper_current_t;
+typedef struct { uint32_t X, Y, Z, X2, Y2, Z2, E0, E1, E2, E3, E4; } tmc_hybrid_threshold_t;
+typedef struct {  int16_t X, Y, Z;                                         } tmc_sgt_t;
 typedef struct PID { float Kp, Ki, Kd; } PID;
 typedef struct PIDC { float Kp, Ki, Kd, Kc; } PIDC;
 
@@ -179,10 +184,22 @@ typedef struct SettingsDataStruct {
   //
   // ULTIPANEL
   //
+  /* gf
   int16_t lcd_preheat_hotend_temp[2],                   // M145 S0 H
           lcd_preheat_bed_temp[2],                      // M145 S0 B
           lcd_preheat_fan_speed[2];                     // M145 S0 F
-
+  
+  #if ENABLED(FYSTLCD_V1)
+  int16_t lcd_preheat_hotend_temp[FILAMENT_OPE_CHOICES],                   // M145 S0 H
+          lcd_preheat_bed_temp[FILAMENT_OPE_CHOICES],                      // M145 S0 B
+          lcd_preheat_fan_speed[FILAMENT_OPE_CHOICES];                     // M145 S0 F
+  #else
+  int16_t lcd_preheat_hotend_temp[2],                   // M145 S0 H
+          lcd_preheat_bed_temp[2],                      // M145 S0 B
+          lcd_preheat_fan_speed[2];                     // M145 S0 F
+  #endif    
+  */
+  
   //
   // PIDTEMP
   //
@@ -357,7 +374,8 @@ void MarlinSettings::postprocess() {
   bool MarlinSettings::eeprom_error, MarlinSettings::validating;
 
   void MarlinSettings::write_data(int &pos, const uint8_t *value, uint16_t size, uint16_t *crc) {
-    if (eeprom_error) { pos += size; return; }
+    //if (eeprom_error) { pos += size; return; }
+    if (eeprom_error) { pos += size; SERIAL_ECHOLNPGM("eeprom_error");return; }
     while (size--) {
       uint8_t * const p = (uint8_t * const)pos;
       uint8_t v = *value;
@@ -379,7 +397,8 @@ void MarlinSettings::postprocess() {
   }
 
   void MarlinSettings::read_data(int &pos, uint8_t* value, uint16_t size, uint16_t *crc, const bool force/*=false*/) {
-    if (eeprom_error) { pos += size; return; }
+    //if (eeprom_error) { pos += size; return; }
+    if (eeprom_error) { pos += size; SERIAL_ECHOLNPGM("eeprom_error");return; }
     do {
       uint8_t c = eeprom_read_byte((unsigned char*)pos);
       if (!validating || force) *value = c;
@@ -402,7 +421,8 @@ void MarlinSettings::postprocess() {
    * M500 - Store Configuration
    */
   bool MarlinSettings::save() {
-    float dummy = 0;
+    //float dummy = 0;
+    float dummy = 0.0f;
     char ver[4] = "ERR";
 
     uint16_t working_crc = 0;
@@ -586,7 +606,11 @@ void MarlinSettings::postprocess() {
 
     #endif
 
+    /* gf
+
     _FIELD_TEST(lcd_preheat_hotend_temp);
+    _FIELD_TEST(lcd_preheat_bed_temp);//gf
+    _FIELD_TEST(lcd_preheat_fan_speed); //gf
 
     #if DISABLED(ULTIPANEL)&&DISABLED(FYSTLCD_V1)
       constexpr int16_t lcd_preheat_hotend_temp[2] = { PREHEAT_1_TEMP_HOTEND, PREHEAT_2_TEMP_HOTEND },
@@ -597,6 +621,9 @@ void MarlinSettings::postprocess() {
     EEPROM_WRITE(lcd_preheat_hotend_temp);
     EEPROM_WRITE(lcd_preheat_bed_temp);
     EEPROM_WRITE(lcd_preheat_fan_speed);
+    _FIELD_TEST(lcd_preheat_bed_temp);//gf
+    _FIELD_TEST(lcd_preheat_fan_speed); //gf
+    */
 
     for (uint8_t e = 0; e < MAX_EXTRUDERS; e++) {
 
@@ -617,10 +644,9 @@ void MarlinSettings::postprocess() {
         {
           dummy = DUMMY_PID_VALUE; // When read, will not change the existing value
           EEPROM_WRITE(dummy); // Kp
-          dummy = 0;
+          dummy = 0.0f;
           for (uint8_t q = 3; q--;) EEPROM_WRITE(dummy); // Ki, Kd, Kc
         }
-
     } // Hotends Loop
 
     _FIELD_TEST(lpq_len);
@@ -692,6 +718,7 @@ void MarlinSettings::postprocess() {
     // Save TMC2130 or TMC2208 Configuration, and placeholder values
     //
 
+/*
     _FIELD_TEST(tmc_stepper_current);
 
     uint16_t tmc_stepper_current[TMC_AXES] = {
@@ -755,8 +782,67 @@ void MarlinSettings::postprocess() {
         0
       #endif
     };
+	
     EEPROM_WRITE(tmc_stepper_current);
-
+	*/
+	_FIELD_TEST(tmc_stepper_current);
+	//tmc_stepper_current_t tmc_stepper_current = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    tmc_stepper_current_t tmc_stepper_current = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    
+    #if HAS_TRINAMIC
+      #if AXIS_IS_TMC(X)
+              tmc_stepper_current.X = stepperX.getMilliamps();
+      #endif
+      #if AXIS_IS_TMC(Y)
+              tmc_stepper_current.Y = stepperY.getMilliamps();
+      #endif
+      #if AXIS_IS_TMC(Z)
+              tmc_stepper_current.Z = stepperZ.getMilliamps();
+      #endif
+      #if AXIS_IS_TMC(X2)
+              tmc_stepper_current.X2 = stepperX2.getMilliamps();
+      #endif
+      #if AXIS_IS_TMC(Y2)
+              tmc_stepper_current.Y2 = stepperY2.getMilliamps();
+      #endif
+      #if AXIS_IS_TMC(Z2)
+              tmc_stepper_current.Z2 = stepperZ2.getMilliamps();
+      #endif
+      //#if AXIS_IS_TMC(Z3)
+      //        tmc_stepper_current.Z3 = stepperZ3.getMilliamps();
+      //#endif
+      #if MAX_EXTRUDERS
+        #if AXIS_IS_TMC(E0)
+                tmc_stepper_current.E0 = stepperE0.getMilliamps();
+        #endif
+        #if MAX_EXTRUDERS > 1
+          #if AXIS_IS_TMC(E1)
+                  tmc_stepper_current.E1 = stepperE1.getMilliamps();
+          #endif
+          #if MAX_EXTRUDERS > 2
+            #if AXIS_IS_TMC(E2)
+                    tmc_stepper_current.E2 = stepperE2.getMilliamps();
+            #endif
+            #if MAX_EXTRUDERS > 3
+              #if AXIS_IS_TMC(E3)
+                      tmc_stepper_current.E3 = stepperE3.getMilliamps();
+              #endif
+              #if MAX_EXTRUDERS > 4
+                #if AXIS_IS_TMC(E4)
+                        tmc_stepper_current.E4 = stepperE4.getMilliamps();
+                #endif
+                //#if MAX_EXTRUDERS > 5
+                //  #if AXIS_IS_TMC(E5)
+                //          tmc_stepper_current.E5 = stepperE5.getMilliamps();
+                //  #endif
+                //#endif // MAX_EXTRUDERS > 5
+              #endif // MAX_EXTRUDERS > 4
+            #endif // MAX_EXTRUDERS > 3
+          #endif // MAX_EXTRUDERS > 2
+        #endif // MAX_EXTRUDERS > 1
+      #endif // MAX_EXTRUDERS
+    #endif
+	 EEPROM_WRITE(tmc_stepper_current);
     //
     // Save TMC2130 or TMC2208 Hybrid Threshold, and placeholder values
     //
@@ -831,6 +917,7 @@ void MarlinSettings::postprocess() {
     //
     // TMC2130 Sensorless homing threshold
     //
+	/*
     int16_t tmc_sgt[XYZ] = {
       #if ENABLED(SENSORLESS_HOMING)
         #if X_SENSORLESS
@@ -852,6 +939,20 @@ void MarlinSettings::postprocess() {
         0
       #endif
     };
+    EEPROM_WRITE(tmc_sgt);
+	*/
+    tmc_sgt_t tmc_sgt = { 0, 0, 0 };
+    #if USE_SENSORLESS
+      #if X_SENSORLESS
+            tmc_sgt.X = stepperX.sgt();
+      #endif
+      #if Y_SENSORLESS
+            tmc_sgt.Y = stepperY.sgt();
+      #endif
+      #if Z_SENSORLESS
+            tmc_sgt.Z = stepperZ.sgt();
+      #endif
+    #endif
     EEPROM_WRITE(tmc_sgt);
 
     //
@@ -1190,7 +1291,7 @@ void MarlinSettings::postprocess() {
       //
       // LCD Preheat settings
       //
-
+/* gf
       _FIELD_TEST(lcd_preheat_hotend_temp);
 
       #if DISABLED(ULTIPANEL)&&DISABLED(FYSTLCD_V1)
@@ -1204,7 +1305,7 @@ void MarlinSettings::postprocess() {
       //  WITHIN(lcd_preheat_fan_speed, 0, 255),
       //  "lcd_preheat_fan_speed out of range"
       //);
-
+*/
       //
       // Hotend PID
       //
@@ -1315,15 +1416,15 @@ void MarlinSettings::postprocess() {
 
       //
       // TMC2130 Stepper Settings
-      //
+      //	  
+	    _FIELD_TEST(tmc_stepper_current);
 
-      _FIELD_TEST(tmc_stepper_current);
+      tmc_stepper_current_t currents;
+      EEPROM_READ(currents);
 
       #if HAS_TRINAMIC
 
-        #define SET_CURR(Q) stepper##Q.setCurrent(currents[TMC_##Q] ? currents[TMC_##Q] : Q##_CURRENT, R_SENSE, HOLD_MULTIPLIER)
-        uint16_t currents[TMC_AXES];
-        EEPROM_READ(currents);
+        #define SET_CURR(Q) stepper##Q.rms_current(currents.Q ? currents.Q : Q##_CURRENT)
         if (!validating) {
           #if AXIS_IS_TMC(X)
             SET_CURR(X);
@@ -1343,6 +1444,9 @@ void MarlinSettings::postprocess() {
           #if AXIS_IS_TMC(Z2)
             SET_CURR(Z2);
           #endif
+          //#if AXIS_IS_TMC(Z3)
+          //  SET_CURR(Z3);
+          //#endif
           #if AXIS_IS_TMC(E0)
             SET_CURR(E0);
           #endif
@@ -1358,12 +1462,12 @@ void MarlinSettings::postprocess() {
           #if AXIS_IS_TMC(E4)
             SET_CURR(E4);
           #endif
+          //#if AXIS_IS_TMC(E5)
+          //  SET_CURR(E5);
+          //#endif
         }
-      #else
-        uint16_t val;
-        for (uint8_t q=TMC_AXES; q--;) EEPROM_READ(val);
       #endif
-
+      
       #if ENABLED(HYBRID_THRESHOLD)
         #define TMC_SET_PWMTHRS(A,Q) tmc_set_pwmthrs(stepper##Q, tmc_hybrid_threshold[TMC_##Q], planner.axis_steps_per_mm[_AXIS(A)])
         uint32_t tmc_hybrid_threshold[TMC_AXES];
@@ -1413,38 +1517,47 @@ void MarlinSettings::postprocess() {
        * X and X2 use the same value
        * Y and Y2 use the same value
        * Z and Z2 use the same value
-       */
-      int16_t tmc_sgt[XYZ];
+       */	  
+	    tmc_sgt_t tmc_sgt;
+      _FIELD_TEST(tmc_sgt);
       EEPROM_READ(tmc_sgt);
-      #if ENABLED(SENSORLESS_HOMING)
+      #if USE_SENSORLESS
         if (!validating) {
-          #ifdef X_HOMING_SENSITIVITY
+          #ifdef X_STALL_SENSITIVITY
             #if AXIS_HAS_STALLGUARD(X)
-              stepperX.sgt(tmc_sgt[0]);
+              stepperX.sgt(tmc_sgt.X);
             #endif
             #if AXIS_HAS_STALLGUARD(X2)
-              stepperX2.sgt(tmc_sgt[0]);
+              stepperX2.sgt(tmc_sgt.X);
             #endif
           #endif
-          #ifdef Y_HOMING_SENSITIVITY
+          #ifdef Y_STALL_SENSITIVITY
             #if AXIS_HAS_STALLGUARD(Y)
-              stepperY.sgt(tmc_sgt[1]);
+              stepperY.sgt(tmc_sgt.Y);
             #endif
             #if AXIS_HAS_STALLGUARD(Y2)
-              stepperY2.sgt(tmc_sgt[1]);
+              stepperY2.sgt(tmc_sgt.Y);
             #endif
           #endif
-          #ifdef Z_HOMING_SENSITIVITY
+          #ifdef Z_STALL_SENSITIVITY
             #if AXIS_HAS_STALLGUARD(Z)
-              stepperZ.sgt(tmc_sgt[2]);
+              stepperZ.sgt(tmc_sgt.Z);
             #endif
             #if AXIS_HAS_STALLGUARD(Z2)
-              stepperZ2.sgt(tmc_sgt[2]);
+              stepperZ2.sgt(tmc_sgt.Z);
             #endif
+            //#if AXIS_HAS_STALLGUARD(Z3)
+            //  stepperZ3.sgt(tmc_sgt.Z);
+            //#endif
           #endif
+
+            // fzl:add 20190116
+            //#if AXIS_HAS_STALLGUARD(Z)
+            //  stepperZ.sgt(63);
+            //#endif
+
         }
       #endif
-
       //
       // Linear Advance
       //
@@ -1923,7 +2036,7 @@ void MarlinSettings::reset() {
     #if ENABLED(HYBRID_THRESHOLD)
       void say_M913() { SERIAL_ECHOPGM("  M913"); }
     #endif
-    #if ENABLED(SENSORLESS_HOMING)
+    #if USE_SENSORLESS
       void say_M914() { SERIAL_ECHOPGM("  M914"); }
     #endif
   #endif
@@ -2439,13 +2552,13 @@ void MarlinSettings::reset() {
         say_M906();
       #endif
       #if AXIS_IS_TMC(X)
-        SERIAL_ECHOPAIR(" X", stepperX.getCurrent());
+        SERIAL_ECHOPAIR(" X", stepperX.getMilliamps());
       #endif
       #if AXIS_IS_TMC(Y)
-        SERIAL_ECHOPAIR(" Y", stepperY.getCurrent());
+        SERIAL_ECHOPAIR(" Y", stepperY.getMilliamps());
       #endif
       #if AXIS_IS_TMC(Z)
-        SERIAL_ECHOPAIR(" Z", stepperZ.getCurrent());
+        SERIAL_ECHOPAIR(" Z", stepperZ.getMilliamps());
       #endif
       #if AXIS_IS_TMC(X) || AXIS_IS_TMC(Y) || AXIS_IS_TMC(Z)
         SERIAL_EOL();
@@ -2455,36 +2568,36 @@ void MarlinSettings::reset() {
         SERIAL_ECHOPGM(" I1");
       #endif
       #if AXIS_IS_TMC(X2)
-        SERIAL_ECHOPAIR(" X", stepperX2.getCurrent());
+        SERIAL_ECHOPAIR(" X", stepperX2.getMilliamps());
       #endif
       #if AXIS_IS_TMC(Y2)
-        SERIAL_ECHOPAIR(" Y", stepperY2.getCurrent());
+        SERIAL_ECHOPAIR(" Y", stepperY2.getMilliamps());
       #endif
       #if AXIS_IS_TMC(Z2)
-        SERIAL_ECHOPAIR(" Z", stepperZ2.getCurrent());
+        SERIAL_ECHOPAIR(" Z", stepperZ2.getMilliamps());
       #endif
       #if AXIS_IS_TMC(X2) || AXIS_IS_TMC(Y2) || AXIS_IS_TMC(Z2)
         SERIAL_EOL();
       #endif
       #if AXIS_IS_TMC(E0)
         say_M906();
-        SERIAL_ECHOLNPAIR(" T0 E", stepperE0.getCurrent());
+        SERIAL_ECHOLNPAIR(" T0 E", stepperE0.getMilliamps());
       #endif
       #if E_STEPPERS > 1 && AXIS_IS_TMC(E1)
         say_M906();
-        SERIAL_ECHOLNPAIR(" T1 E", stepperE1.getCurrent());
+        SERIAL_ECHOLNPAIR(" T1 E", stepperE1.getMilliamps());
       #endif
       #if E_STEPPERS > 2 && AXIS_IS_TMC(E2)
         say_M906();
-        SERIAL_ECHOLNPAIR(" T2 E", stepperE2.getCurrent());
+        SERIAL_ECHOLNPAIR(" T2 E", stepperE2.getMilliamps());
       #endif
       #if E_STEPPERS > 3 && AXIS_IS_TMC(E3)
         say_M906();
-        SERIAL_ECHOLNPAIR(" T3 E", stepperE3.getCurrent());
+        SERIAL_ECHOLNPAIR(" T3 E", stepperE3.getMilliamps());
       #endif
       #if E_STEPPERS > 4 && AXIS_IS_TMC(E4)
         say_M906();
-        SERIAL_ECHOLNPAIR(" T4 E", stepperE4.getCurrent());
+        SERIAL_ECHOLNPAIR(" T4 E", stepperE4.getMilliamps());
       #endif
       SERIAL_EOL();
 
@@ -2554,7 +2667,7 @@ void MarlinSettings::reset() {
       /**
        * TMC2130 Sensorless homing thresholds
        */
-      #if ENABLED(SENSORLESS_HOMING)
+      #if USE_SENSORLESS
         if (!forReplay) {
           CONFIG_ECHO_START;
           SERIAL_ECHOLNPGM("Sensorless homing threshold:");

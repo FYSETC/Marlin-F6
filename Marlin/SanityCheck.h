@@ -1485,7 +1485,7 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE && Y_MAX_LENGTH >= Y_BED_SIZE,
     || defined(E4_HARDWARE_SERIAL) )
   #error "select hardware UART for TMC2208 to use both TMC2208 and ENDSTOP_INTERRUPTS_FEATURE."
 #endif
-
+/*
 #if ENABLED(SENSORLESS_HOMING)
   // Require STEALTHCHOP for SENSORLESS_HOMING on DELTA as the transition from spreadCycle to stealthChop
   // is necessary in order to reset the stallGuard indication between the initial movement of all three
@@ -1509,6 +1509,7 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE && Y_MAX_LENGTH >= Y_BED_SIZE,
     #error "SENSORLESS_HOMING is incompatible with ENDSTOP_NOISE_FILTER."
   #endif
 #endif
+*/
 
 // Sensorless homing is required for both combined steppers in an H-bot
 #if CORE_IS_XY && X_SENSORLESS != Y_SENSORLESS
@@ -1519,7 +1520,7 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE && Y_MAX_LENGTH >= Y_BED_SIZE,
   #error "CoreYZ requires both Y and Z to use sensorless homing if either does."
 #endif
 
-#if ENABLED(HYBRID_THRESHOLD) && DISABLED(STEALTHCHOP)
+#if ENABLED(HYBRID_THRESHOLD) && !STEALTHCHOP_ENABLED
   #error "Enable STEALTHCHOP to use HYBRID_THRESHOLD."
 #endif
 #if ENABLED(TMC_Z_CALIBRATION) && !AXIS_IS_TMC(Z) && !AXIS_IS_TMC(Z2)
@@ -1529,7 +1530,7 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE && Y_MAX_LENGTH >= Y_BED_SIZE,
 #if ENABLED(SENSORLESS_HOMING) && !HAS_STALLGUARD
   #error "SENSORLESS_HOMING requires TMC2130 or TMC2660 stepper drivers."
 #endif
-#if ENABLED(STEALTHCHOP) && !HAS_STEALTHCHOP
+#if STEALTHCHOP_ENABLED && !HAS_STEALTHCHOP
   #error "STEALTHCHOP requires TMC2130 or TMC2208 stepper drivers."
 #endif
 
