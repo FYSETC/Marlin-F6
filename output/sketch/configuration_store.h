@@ -81,6 +81,8 @@ class MarlinSettings {
     #if ENABLED(EEPROM_SETTINGS)
 
       static bool eeprom_error, validating;
+      // gf - validating:checking if eeprom is ok,through version maching and eeprom size check
+      // if one of check proc not good , eeprom_error set true
 
       #if ENABLED(AUTO_BED_LEVELING_UBL) // Eventually make these available if any leveling system
                                          // That can store is enabled

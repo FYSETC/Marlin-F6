@@ -2894,39 +2894,80 @@ void clean_up_after_endstop_or_probe_move() {
   /**
    * Set sensorless homing if the axis has it, accounting for Core Kinematics.
    */
-  void sensorless_homing_per_axis(const AxisEnum axis, const bool enable=true) {
+  sensorless_t start_sensorless_homing_per_axis(const AxisEnum axis) {
+    sensorless_t stealth_states { false, false, false };
+
     switch (axis) {
+      default: break;
       #if X_SENSORLESS
         case X_AXIS:
-          tmc_sensorless_homing(stepperX, enable);
+          X_ENABLE_WRITE(X_ENABLE_ON); // fzl:add
+          stealth_states.x = tmc_enable_stallguard(stepperX);
           #if CORE_IS_XY && Y_SENSORLESS
-            tmc_sensorless_homing(stepperY, enable);
+            stealth_states.y = tmc_enable_stallguard(stepperY);
           #elif CORE_IS_XZ && Z_SENSORLESS
-            tmc_sensorless_homing(stepperZ, enable);
+            stealth_states.z = tmc_enable_stallguard(stepperZ);
           #endif
           break;
       #endif
       #if Y_SENSORLESS
         case Y_AXIS:
-          tmc_sensorless_homing(stepperY, enable);
+          Y_ENABLE_WRITE(Y_ENABLE_ON); // fzl:add
+          stealth_states.y = tmc_enable_stallguard(stepperY);
           #if CORE_IS_XY && X_SENSORLESS
-            tmc_sensorless_homing(stepperX, enable);
+            stealth_states.x = tmc_enable_stallguard(stepperX);
           #elif CORE_IS_YZ && Z_SENSORLESS
-            tmc_sensorless_homing(stepperZ, enable);
+            stealth_states.z = tmc_enable_stallguard(stepperZ);
           #endif
           break;
       #endif
       #if Z_SENSORLESS
         case Z_AXIS:
-          tmc_sensorless_homing(stepperZ, enable);
+          stealth_states.z = tmc_enable_stallguard(stepperZ);
           #if CORE_IS_XZ && X_SENSORLESS
-            tmc_sensorless_homing(stepperX, enable);
+            stealth_states.x = tmc_enable_stallguard(stepperX);
           #elif CORE_IS_YZ && Y_SENSORLESS
-            tmc_sensorless_homing(stepperY, enable);
+            stealth_states.y = tmc_enable_stallguard(stepperY);
           #endif
           break;
       #endif
+    }
+    return stealth_states;
+  }
+
+  void end_sensorless_homing_per_axis(const AxisEnum axis, sensorless_t enable_stealth) {
+    switch (axis) {
       default: break;
+      #if X_SENSORLESS
+        case X_AXIS:
+          tmc_disable_stallguard(stepperX, enable_stealth.x);
+          #if CORE_IS_XY && Y_SENSORLESS
+            tmc_disable_stallguard(stepperY, enable_stealth.y);
+          #elif CORE_IS_XZ && Z_SENSORLESS
+            tmc_disable_stallguard(stepperZ, enable_stealth.z);
+          #endif
+          break;
+      #endif
+      #if Y_SENSORLESS
+        case Y_AXIS:
+          tmc_disable_stallguard(stepperY, enable_stealth.y);
+          #if CORE_IS_XY && X_SENSORLESS
+            tmc_disable_stallguard(stepperX, enable_stealth.x);
+          #elif CORE_IS_YZ && Z_SENSORLESS
+            tmc_disable_stallguard(stepperZ, enable_stealth.z);
+          #endif
+          break;
+      #endif
+      #if Z_SENSORLESS
+        case Z_AXIS:
+          tmc_disable_stallguard(stepperZ, enable_stealth.z);
+          #if CORE_IS_XZ && X_SENSORLESS
+            tmc_disable_stallguard(stepperX, enable_stealth.x);
+          #elif CORE_IS_YZ && Y_SENSORLESS
+            tmc_disable_stallguard(stepperY, enable_stealth.y);
+          #endif
+          break;
+      #endif
     }
   }
 
@@ -2970,6 +3011,9 @@ static void do_homing_move(const AxisEnum axis, const float distance, const floa
     home_dir(axis);
   const bool is_home_dir = (axis_home_dir > 0) == (distance > 0);
 
+  #if ENABLED(SENSORLESS_HOMING)
+    sensorless_t stealth_states;
+  #endif
   if (is_home_dir) {
 
     #if HOMING_Z_WITH_PROBE && QUIET_PROBING
@@ -2978,7 +3022,7 @@ static void do_homing_move(const AxisEnum axis, const float distance, const floa
 
     // Disable stealthChop if used. Enable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
-      sensorless_homing_per_axis(axis);
+      stealth_states = start_sensorless_homing_per_axis(axis);
     #endif
   }
 
@@ -3009,7 +3053,7 @@ static void do_homing_move(const AxisEnum axis, const float distance, const floa
 
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
-      sensorless_homing_per_axis(axis, false);
+      end_sensorless_homing_per_axis(axis, stealth_states);
     #endif
   }
 
@@ -3091,6 +3135,11 @@ static void homeaxis(const AxisEnum axis) {
     if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
   #endif
 
+  // gf  
+  #if HAS_DRIVER(TMC2660)
+  	do_homing_move(axis, -1 * axis_home_dir);
+  #endif
+  
   do_homing_move(axis, 1.5f * max_length(axis) * axis_home_dir);
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
@@ -3738,9 +3787,10 @@ inline void gcode_G4() {
                 fr_mm_s = MIN(homing_feedrate(X_AXIS), homing_feedrate(Y_AXIS)) * SQRT(sq(mlratio) + 1.0);
 
     #if ENABLED(SENSORLESS_HOMING)
-      sensorless_homing_per_axis(X_AXIS);
-      sensorless_homing_per_axis(Y_AXIS);
-    #endif
+      sensorless_t stealth_states { false, false, false };
+      stealth_states.x = tmc_enable_stallguard(stepperX);
+      stealth_states.y = tmc_enable_stallguard(stepperY);
+	#endif
 
     do_blocking_move_to_xy(1.5 * mlx * x_axis_home_dir, 1.5 * mly * home_dir(Y_AXIS), fr_mm_s);
 
@@ -3749,8 +3799,8 @@ inline void gcode_G4() {
     current_position[X_AXIS] = current_position[Y_AXIS] = 0.0;
 
     #if ENABLED(SENSORLESS_HOMING)
-      sensorless_homing_per_axis(X_AXIS, false);
-      sensorless_homing_per_axis(Y_AXIS, false);
+  	  tmc_disable_stallguard(stepperX, stealth_states.x);
+      tmc_disable_stallguard(stepperY, stealth_states.y);
     #endif
   }
 
@@ -3913,14 +3963,6 @@ inline void gcode_G4() {
 
 #if ENABLED(DELTA)
 
-  #if ENABLED(SENSORLESS_HOMING)
-    inline void delta_sensorless_homing(const bool on=true) {
-      sensorless_homing_per_axis(A_AXIS, on);
-      sensorless_homing_per_axis(B_AXIS, on);
-      sensorless_homing_per_axis(C_AXIS, on);
-    }
-  #endif
-
   /**
    * A delta can only safely home all axes at the same time
    * This is like quick_home_xy() but for 3 towers.
@@ -3935,7 +3977,10 @@ inline void gcode_G4() {
 
     // Disable stealthChop if used. Enable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
-      delta_sensorless_homing();
+	  sensorless_t stealth_states { false, false, false };
+      stealth_states.x = tmc_enable_stallguard(stepperX);
+      stealth_states.y = tmc_enable_stallguard(stepperY);
+      stealth_states.z = tmc_enable_stallguard(stepperZ);
     #endif
 
     // Move all carriages together linearly until an endstop is hit.
@@ -3946,7 +3991,9 @@ inline void gcode_G4() {
 
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
-      delta_sensorless_homing(false);
+      tmc_disable_stallguard(stepperX, stealth_states.x);
+      tmc_disable_stallguard(stepperY, stealth_states.y);
+      tmc_disable_stallguard(stepperZ, stealth_states.z);
     #endif
 
     endstops.validate_homing_move();
@@ -11052,10 +11099,25 @@ inline void gcode_M502() {
 #if HAS_TRINAMIC
   #if ENABLED(TMC_DEBUG)
     inline void gcode_M122() {
-      if (parser.seen('S'))
-        tmc_set_report_status(parser.value_bool());
-      else
-        tmc_report_all();
+      bool print_axis[XYZE] = { false, false, false, false },
+      print_all = true;
+      LOOP_XYZE(i) if (parser.seen(axis_codes[i])) { print_axis[i] = true; print_all = false; }
+
+      if (print_all) LOOP_XYZE(i) print_axis[i] = true;
+
+      #if ENABLED(TMC_DEBUG)
+        #if ENABLED(MONITOR_DRIVER_STATUS)
+          if (parser.seen('S'))
+            tmc_set_report_status(parser.value_bool());
+        #endif
+
+        if (parser.seen('V'))
+          tmc_get_registers(print_axis[X_AXIS], print_axis[Y_AXIS], print_axis[Z_AXIS], print_axis[E_AXIS]);
+        else
+          tmc_report_all(print_axis[X_AXIS], print_axis[Y_AXIS], print_axis[Z_AXIS], print_axis[E_AXIS]);
+      #endif
+
+      test_tmc_connection(print_axis[X_AXIS], print_axis[Y_AXIS], print_axis[Z_AXIS], print_axis[E_AXIS]);
     }
   #endif // TMC_DEBUG
 
@@ -11064,7 +11126,7 @@ inline void gcode_M502() {
    * Report driver currents when no axis specified
    */
   inline void gcode_M906() {
-    #define TMC_SAY_CURRENT(Q) tmc_get_current(stepper##Q, TMC_##Q)
+    #define TMC_SAY_CURRENT(Q) tmc_get_current(stepper##Q)
     #define TMC_SET_CURRENT(Q) tmc_set_current(stepper##Q, value)
 
     bool report = true;
@@ -11165,37 +11227,37 @@ inline void gcode_M502() {
    */
   inline void gcode_M911() {
     #if M91x_USE(X)
-      tmc_report_otpw(stepperX, TMC_X);
+      tmc_report_otpw(stepperX);
     #endif
     #if M91x_USE(X2)
-      tmc_report_otpw(stepperX2, TMC_X2);
+      tmc_report_otpw(stepperX2);
     #endif
     #if M91x_USE(Y)
-      tmc_report_otpw(stepperY, TMC_Y);
+      tmc_report_otpw(stepperY);
     #endif
     #if M91x_USE(Y2)
-      tmc_report_otpw(stepperY2, TMC_Y2);
+      tmc_report_otpw(stepperY2);
     #endif
     #if M91x_USE(Z)
-      tmc_report_otpw(stepperZ, TMC_Z);
+      tmc_report_otpw(stepperZ);
     #endif
     #if M91x_USE(Z2)
-      tmc_report_otpw(stepperZ2, TMC_Z2);
+      tmc_report_otpw(stepperZ2);
     #endif
     #if M91x_USE_E(0)
-      tmc_report_otpw(stepperE0, TMC_E0);
+      tmc_report_otpw(stepperE0);
     #endif
     #if M91x_USE_E(1)
-      tmc_report_otpw(stepperE1, TMC_E1);
+      tmc_report_otpw(stepperE1);
     #endif
     #if M91x_USE_E(2)
-      tmc_report_otpw(stepperE2, TMC_E2);
+      tmc_report_otpw(stepperE2);
     #endif
     #if M91x_USE_E(3)
-      tmc_report_otpw(stepperE3, TMC_E3);
+      tmc_report_otpw(stepperE3);
     #endif
     #if M91x_USE_E(4)
-      tmc_report_otpw(stepperE4, TMC_E4);
+      tmc_report_otpw(stepperE4);
     #endif
   }
 
@@ -11221,49 +11283,49 @@ inline void gcode_M502() {
     #if M91x_USE(X) || M91x_USE(X2)
       const uint8_t xval = parser.byteval(axis_codes[X_AXIS], 10);
       #if M91x_USE(X)
-        if (hasNone || xval == 1 || (hasX && xval == 10)) tmc_clear_otpw(stepperX, TMC_X);
+        if (hasNone || xval == 1 || (hasX && xval == 10)) tmc_clear_otpw(stepperX);
       #endif
       #if M91x_USE(X2)
-        if (hasNone || xval == 2 || (hasX && xval == 10)) tmc_clear_otpw(stepperX2, TMC_X2);
+        if (hasNone || xval == 2 || (hasX && xval == 10)) tmc_clear_otpw(stepperX2);
       #endif
     #endif
 
     #if M91x_USE(Y) || M91x_USE(Y2)
       const uint8_t yval = parser.byteval(axis_codes[Y_AXIS], 10);
       #if M91x_USE(Y)
-        if (hasNone || yval == 1 || (hasY && yval == 10)) tmc_clear_otpw(stepperY, TMC_Y);
+        if (hasNone || yval == 1 || (hasY && yval == 10)) tmc_clear_otpw(stepperY);
       #endif
       #if M91x_USE(Y2)
-        if (hasNone || yval == 2 || (hasY && yval == 10)) tmc_clear_otpw(stepperY2, TMC_Y2);
+        if (hasNone || yval == 2 || (hasY && yval == 10)) tmc_clear_otpw(stepperY2);
       #endif
     #endif
 
     #if M91x_USE(Z) || M91x_USE(Z2)
       const uint8_t zval = parser.byteval(axis_codes[Z_AXIS], 10);
       #if M91x_USE(Z)
-        if (hasNone || zval == 1 || (hasZ && zval == 10)) tmc_clear_otpw(stepperZ, TMC_Z);
+        if (hasNone || zval == 1 || (hasZ && zval == 10)) tmc_clear_otpw(stepperZ);
       #endif
       #if M91x_USE(Z2)
-        if (hasNone || zval == 2 || (hasZ && zval == 10)) tmc_clear_otpw(stepperZ2, TMC_Z2);
+        if (hasNone || zval == 2 || (hasZ && zval == 10)) tmc_clear_otpw(stepperZ2);
       #endif
     #endif
 
     #if M91x_USE_E(0) || M91x_USE_E(1) || M91x_USE_E(2) || M91x_USE_E(3) || M91x_USE_E(4)
       const uint8_t eval = parser.byteval(axis_codes[E_AXIS], 10);
       #if M91x_USE_E(0)
-        if (hasNone || eval == 0 || (hasE && eval == 10)) tmc_clear_otpw(stepperE0, TMC_E0);
+        if (hasNone || eval == 0 || (hasE && eval == 10)) tmc_clear_otpw(stepperE0);
       #endif
       #if M91x_USE_E(1)
-        if (hasNone || eval == 1 || (hasE && eval == 10)) tmc_clear_otpw(stepperE1, TMC_E1);
+        if (hasNone || eval == 1 || (hasE && eval == 10)) tmc_clear_otpw(stepperE1);
       #endif
       #if M91x_USE_E(2)
-        if (hasNone || eval == 2 || (hasE && eval == 10)) tmc_clear_otpw(stepperE2, TMC_E2);
+        if (hasNone || eval == 2 || (hasE && eval == 10)) tmc_clear_otpw(stepperE2);
       #endif
       #if M91x_USE_E(3)
-        if (hasNone || eval == 3 || (hasE && eval == 10)) tmc_clear_otpw(stepperE3, TMC_E3);
+        if (hasNone || eval == 3 || (hasE && eval == 10)) tmc_clear_otpw(stepperE3);
       #endif
       #if M91x_USE_E(4)
-        if (hasNone || eval == 4 || (hasE && eval == 10)) tmc_clear_otpw(stepperE4, TMC_E4);
+        if (hasNone || eval == 4 || (hasE && eval == 10)) tmc_clear_otpw(stepperE4);
       #endif
     #endif
   }
@@ -11371,9 +11433,9 @@ inline void gcode_M502() {
   /**
    * M914: Set SENSORLESS_HOMING sensitivity.
    */
-  #if ENABLED(SENSORLESS_HOMING)
+  #if USE_SENSORLESS
     inline void gcode_M914() {
-      #define TMC_SAY_SGT(Q) tmc_get_sgt(stepper##Q, TMC_##Q)
+      #define TMC_SAY_SGT(Q) tmc_get_sgt(stepper##Q)
       #define TMC_SET_SGT(Q) tmc_set_sgt(stepper##Q, value)
 
       bool report = true;
@@ -12726,13 +12788,26 @@ void process_parsed_command() {
         #if ENABLED(HYBRID_THRESHOLD)
           case 913: gcode_M913(); break;                          // M913: Set HYBRID_THRESHOLD speed.
         #endif
-        #if ENABLED(SENSORLESS_HOMING)
+        #if USE_SENSORLESS
           case 914: gcode_M914(); break;                          // M914: Set SENSORLESS_HOMING sensitivity.
         #endif
         #if ENABLED(TMC_Z_CALIBRATION)
           case 915: gcode_M915(); break;                          // M915: TMC Z axis calibration routine
         #endif
       #endif
+
+      // gf:add 20190121
+      case 997: {
+        reset_stepper_drivers();
+      }break;      
+
+      // gf:add 20190121
+      case 998: {
+        tmc_enable_stealthChop(stepperX);
+        tmc_enable_stealthChop(stepperY);
+        tmc_enable_stealthChop(stepperZ);
+        tmc_enable_stealthChop(stepperE0);
+      }break;      
 
       case 999: gcode_M999(); break;                              // M999: Restart after being Stopped
 
@@ -14549,13 +14624,24 @@ void setup() {
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START();
 
-  // Prepare communication for TMC drivers
-  #if HAS_DRIVER(TMC2130)
+  // Prepare communication for TMC drivers  
+  #if TMC_HAS_SPI
+    #if DISABLED(TMC_USE_SW_SPI)
+      SPI.begin();
+    #endif
     tmc_init_cs_pins();
   #endif
   #if HAS_DRIVER(TMC2208)
     tmc2208_serial_begin();
   #endif
+  /*
+  #if HAS_DRIVER(TMC2130)||HAS_DRIVER(TMC2660)||HAS_DRIVER(TMC5160)
+    tmc_init_cs_pins();
+  #endif
+  #if HAS_DRIVER(TMC2208)
+    tmc2208_serial_begin();
+  #endif
+  */
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;

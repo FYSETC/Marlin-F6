@@ -443,14 +443,15 @@ class Stepper {
 
       if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
     }
-
+	
+    // Set direction bits for all steppers
+    static void set_directions();
   private:
 
     // Set the current position in steps
     static void _set_position(const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &e);
 
-    // Set direction bits for all steppers
-    static void set_directions();
+
 
     FORCE_INLINE static uint32_t calc_timer_interval(uint32_t step_rate, uint8_t scale, uint8_t* loops) {
       uint32_t timer;

@@ -41,8 +41,18 @@
   },
   {
     "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Marlin_main.cpp",
-    "Include": "TMC2130Stepper.h",
-    "Includepath": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src"
+    "Include": "TMCStepper.h",
+    "Includepath": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src"
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Marlin_main.cpp",
+    "Include": "SPI.h",
+    "Includepath": "C:\\Users\\George\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.6.23\\libraries\\SPI\\src"
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Marlin_main.cpp",
+    "Include": "SoftwareSerial.h",
+    "Includepath": "D:\\Documents\\Arduino\\libraries\\SoftwareSerial\\src"
   },
   {
     "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\Marlin_main.cpp",
@@ -221,11 +231,6 @@
   },
   {
     "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\stepper_indirection.cpp",
-    "Include": "SPI.h",
-    "Includepath": "C:\\Users\\George\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.6.23\\libraries\\SPI\\src"
-  },
-  {
-    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\stepper_indirection.cpp",
     "Include": "",
     "Includepath": ""
   },
@@ -290,47 +295,127 @@
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\SW_SPI.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\CHOPCONF.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\COOLCONF.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_CHOPCONF.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\DRVCONF.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_COOLCONF.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\DRVCTRL.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_DRV_STATUS.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\DRVSTATUS.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_GCONF.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\DRV_CONF.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_IHOLD_IRUN.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\DRV_STATUS.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMC2130Stepper\\src\\source\\TMC2130Stepper_PWMCONF.cpp",
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\ENCMODE.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\GCONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\IHOLD_IRUN.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\PWMCONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\RAMP_STAT.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\SGCSCONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\SHORT_CONF.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\SMARTEN.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\SW_MODE.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\SW_SPI.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMC2130Stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMC2208Stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMC2660Stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMC5130Stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMC5160Stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMCStepper.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
     "Sourcefile": "C:\\Users\\George\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.6.23\\libraries\\SPI\\src\\SPI.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\SoftwareSerial\\src\\SoftwareSerial.cpp",
     "Include": "",
     "Includepath": ""
   }

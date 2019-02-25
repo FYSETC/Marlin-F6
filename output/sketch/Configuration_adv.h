@@ -379,8 +379,8 @@
 // @section homing
 
 // Homing hits each endstop, retracts by these distances, then does a slower bump.
-#define X_HOME_BUMP_MM 5
-#define Y_HOME_BUMP_MM 5
+#define X_HOME_BUMP_MM 10
+#define Y_HOME_BUMP_MM 10
 #define Z_HOME_BUMP_MM 2
 #define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 //#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
@@ -1095,7 +1095,22 @@
  */
 #if HAS_TRINAMIC
 
+#if HAS_DRIVER(TMC2660)
+  #define R_SENSE           0.052  // R_sense resistor for 2660
+#elif HAS_DRIVER(TMC5160)
+  #define R_SENSE           0.075  // R_sense resistor for 5160
+#else
   #define R_SENSE           0.11  // R_sense resistor for SilentStepStick2130
+#endif
+
+#if AXIS_DRIVER_TYPE(X, TMC5160)
+  #define X_R_SENSE         0.075 // 5160
+#endif
+  #define X_R_SENSE         0.075 // 5160
+  #define Y_R_SENSE         0.11
+  #define Z_R_SENSE         0.11
+  #define E0_R_SENSE        0.11
+
   #define HOLD_MULTIPLIER    0.5  // Scales down the holding current from run current
   #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
 
@@ -1132,6 +1147,8 @@
   #define E4_CURRENT         800
   #define E4_MICROSTEPS       16
 
+  #define E5_CURRENT         800 //fzl:add
+  #define E5_MICROSTEPS       16 //fzl:add
   /**
    * Use software SPI for TMC2130.
    * The default SW SPI pins are defined the respective pins files,
@@ -1146,7 +1163,30 @@
    * Use Trinamic's ultra quiet stepping mode.
    * When disabled, Marlin will use spreadCycle stepping mode.
    */
+#if HAS_DRIVER(TMC2130)||HAS_DRIVER(TMC5160)
   #define STEALTHCHOP
+#endif
+  //#define STEALTHCHOP
+  #define STEALTHCHOP_XY // gf:add
+  #define STEALTHCHOP_Z  // gf:add
+  #define STEALTHCHOP_E  // gf:add
+
+  // gf:add
+  /**
+   * Optimize spreadCycle chopper parameters by using predefined parameter sets
+   * or with the help of an example included in the library.
+   * Provided parameter sets are
+   * CHOPPER_DEFAULT_12V
+   * CHOPPER_DEFAULT_19V
+   * CHOPPER_DEFAULT_24V
+   * CHOPPER_DEFAULT_36V
+   * CHOPPER_PRUSAMK3_24V // Imported parameters from the official Prusa firmware for MK3 (24V)
+   * CHOPPER_MARLIN_119   // Old defaults from Marlin v1.1.9
+   *
+   * Define you own with
+   * { <off_time[1..15]>, <hysteresis_end[-3..12]>, hysteresis_start[1..8] }
+   */
+#define CHOPPER_TIMING CHOPPER_DEFAULT_12V
 
   /**
    * Monitor Trinamic TMC2130 and TMC2208 drivers for error conditions,
@@ -1199,7 +1239,7 @@
    * It is advised to set X/Y/Z_HOME_BUMP_MM to 0.
    * M914 X/Y/Z to live tune the setting
    */
-  #define SENSORLESS_HOMING // TMC2130 only
+  //#define SENSORLESS_HOMING // TMC2130 only
 
   #if ENABLED(SENSORLESS_HOMING)
     #define X_HOMING_SENSITIVITY  8
@@ -1207,11 +1247,24 @@
     #define Z_HOMING_SENSITIVITY  8
   #endif
 
+  // gf:add
+  #if ENABLED(SENSORLESS_HOMING) || ENABLED(SENSORLESS_PROBING)
+    #define X_STALL_SENSITIVITY  63 // fzl:old 10
+    #define Y_STALL_SENSITIVITY  63 // fzl:old 15
+    //#define Z_STALL_SENSITIVITY  8
+
+    // gf:add 20190111:direction:low current increase homing feedrate and adjust STALL_SENSITIVITY value
+    #define X_STALL_CURRENT   500 // 400
+    #define X_STALL_SENSITIVITY_HOMING  7 // 6
+
+    #define Y_STALL_CURRENT   600//600
+    #define Y_STALL_SENSITIVITY_HOMING  11 // 10
+  #endif
   /**
    * Enable M122 debugging command for TMC stepper drivers.
    * M122 S0/1 will enable continous reporting.
    */
-  //#define TMC_DEBUG
+  #define TMC_DEBUG
 
   /**
    * M915 Z Axis Calibration
