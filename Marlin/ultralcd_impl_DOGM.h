@@ -582,7 +582,7 @@ void lcd_implementation_clear() { } // Automatically cleared by Picture Loop
     }
   }
 
-  #if ENABLED(SDSUPPORT)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
 
     static void _drawmenu_sd(const bool isSelected, const uint8_t row, const char* const pstr, CardReader& theCard, const bool isDir) {
       UNUSED(pstr);
@@ -626,7 +626,7 @@ void lcd_implementation_clear() { } // Automatically cleared by Picture Loop
     #define lcd_implementation_drawmenu_sdfile(sel, row, pstr, theCard) _drawmenu_sd(sel, row, pstr, theCard, false)
     #define lcd_implementation_drawmenu_sddirectory(sel, row, pstr, theCard) _drawmenu_sd(sel, row, pstr, theCard, true)
 
-  #endif // SDSUPPORT
+  #endif // SDSUPPORT || FYS_USBDISK
 
   #if ENABLED(AUTO_BED_LEVELING_UBL)
 

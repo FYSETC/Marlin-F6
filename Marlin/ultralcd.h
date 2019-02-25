@@ -137,7 +137,7 @@
 
   #endif
 
-  #if ENABLED(FILAMENT_LCD_DISPLAY) && ENABLED(SDSUPPORT)
+  #if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
     extern millis_t previous_lcd_status_ms;
   #endif
 
@@ -529,7 +529,7 @@
   void lcd_reselect_last_file();
 #endif
 
-#if (ENABLED(ULTIPANEL)||ENABLED(FYSTLCD_V1)) && ENABLED(SDSUPPORT)
+#if (ENABLED(ULTIPANEL)||ENABLED(FYSTLCD_V1)) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
   extern bool abort_sd_printing;
 #else
   constexpr bool abort_sd_printing = false;

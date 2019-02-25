@@ -15,6 +15,31 @@
     "Includepath": ""
   },
   {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\CH376_com_arduino_spi_hw.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\CH376_com_arduino_uart_hw.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\CH376_debug_arduino.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\CH376_file_sys.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\CH376_hal_base_arduino.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
     "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\FysTLcd.cpp",
     "Include": "",
     "Includepath": ""
@@ -96,6 +121,16 @@
   },
   {
     "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\cardreader.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\cardusbdiskreader.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "D:\\Documents\\GitHub\\Marlin-F6\\output\\sketch\\cardusbfile.cpp",
     "Include": "",
     "Includepath": ""
   },

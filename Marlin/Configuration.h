@@ -1440,6 +1440,16 @@
 #define DISPLAY_CHARSET_HD44780 JAPANESE
 
 /**
+ * USBDISK
+ */
+
+//#define FYS_USBDISK
+#ifdef FYS_USBDISK // 接口选择
+  #define FYS_USBDISK_SPI     // SPI接口U盘
+  //#define FYS_USBDISK_UART  // UART接口U盘
+#endif
+
+/**
  * SD CARD
  *
  * SD Card support is disabled by default. If your controller has an SD slot,

@@ -368,7 +368,7 @@ static void lcd_set_custom_characters(
 
   #endif // LCD_PROGRESS_BAR
 
-  #if ENABLED(SDSUPPORT)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
 
     // CHARSET_MENU
     const static PROGMEM byte refresh[8] = {
@@ -392,7 +392,7 @@ static void lcd_set_custom_characters(
       B00000
     };
 
-  #endif // SDSUPPORT
+  #endif // SDSUPPORT || FYS_USBDISK
 
   #if ENABLED(SHOW_BOOTSCREEN)
     // Set boot screen corner characters
@@ -418,7 +418,7 @@ static void lcd_set_custom_characters(
       #endif
         {
           createChar_P(LCD_UPLEVEL_CHAR, uplevel);
-          #if ENABLED(SDSUPPORT)
+          #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
             // SD Card sub-menu special characters
             createChar_P(LCD_STR_REFRESH[0], refresh);
             createChar_P(LCD_STR_FOLDER[0], folder);
@@ -800,7 +800,7 @@ static void lcd_implementation_status_screen() {
 
     #if LCD_WIDTH < 20
 
-      #if ENABLED(SDSUPPORT)
+      #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
         lcd.setCursor(0, 2);
         lcd_printPGM(PSTR("SD"));
         if (IS_SD_PRINTING)
@@ -808,7 +808,7 @@ static void lcd_implementation_status_screen() {
         else
           lcd_printPGM(PSTR("---"));
           lcd.write('%');
-      #endif // SDSUPPORT
+      #endif // SDSUPPORT ||FYS_USBDISK
 
     #else // LCD_WIDTH >= 20
 
@@ -863,7 +863,7 @@ static void lcd_implementation_status_screen() {
     lcd.print(itostr3(feedrate_percentage));
     lcd.write('%');
 
-    #if LCD_WIDTH >= 20 && ENABLED(SDSUPPORT)
+    #if LCD_WIDTH >= 20 && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
 
       lcd.setCursor(7, 2);
       lcd_printPGM(PSTR("SD"));
@@ -873,7 +873,7 @@ static void lcd_implementation_status_screen() {
         lcd_printPGM(PSTR("---"));
       lcd.write('%');
 
-    #endif // LCD_WIDTH >= 20 && SDSUPPORT
+    #endif // LCD_WIDTH >= 20 && (SDSUPPORT || FYS_USBDISK)
 
     char buffer[10];
     duration_t elapsed = print_job_timer.duration();
@@ -902,7 +902,7 @@ static void lcd_implementation_status_screen() {
     if (progress_bar_percent > 2 && (ELAPSED(millis(), progress_bar_ms + PROGRESS_BAR_MSG_TIME) || !lcd_status_message[0]))
       return lcd_draw_progress_bar(progress_bar_percent);
 
-  #elif ENABLED(FILAMENT_LCD_DISPLAY) && ENABLED(SDSUPPORT)
+  #elif ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
 
     // Show Filament Diameter and Volumetric Multiplier %
     // After allowing lcd_status_message to show for 5 seconds
@@ -920,7 +920,7 @@ static void lcd_implementation_status_screen() {
       return;
     }
 
-  #endif // FILAMENT_LCD_DISPLAY && SDSUPPORT
+  #endif // FILAMENT_LCD_DISPLAY && (SDSUPPORT || FYS_USBDISK)
 
   #if ENABLED(STATUS_MESSAGE_SCROLLING)
     static bool last_blink = false;
@@ -1085,7 +1085,7 @@ static void lcd_implementation_status_screen() {
     }
   }
 
-  #if ENABLED(SDSUPPORT)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
 
     static void lcd_implementation_drawmenu_sd(const bool sel, const uint8_t row, const char* const pstr, CardReader& theCard, const uint8_t concat, const char post_char) {
       UNUSED(pstr);
@@ -1131,7 +1131,7 @@ static void lcd_implementation_status_screen() {
       lcd_implementation_drawmenu_sd(sel, row, pstr, theCard, 2, LCD_STR_FOLDER[0]);
     }
 
-  #endif // SDSUPPORT
+  #endif // SDSUPPORT || FYS_USBDISK
 
   #define lcd_implementation_drawmenu_back(sel, row, pstr, dummy) lcd_implementation_drawmenu_generic(sel, row, pstr, LCD_UPLEVEL_CHAR, LCD_UPLEVEL_CHAR)
   #define lcd_implementation_drawmenu_submenu(sel, row, pstr, data) lcd_implementation_drawmenu_generic(sel, row, pstr, '>', LCD_STR_ARROW_RIGHT[0])

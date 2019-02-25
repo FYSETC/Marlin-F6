@@ -277,7 +277,7 @@ static void lcd_implementation_status_screen() {
     #endif
   }
 
-  #if ENABLED(SDSUPPORT)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
     //
     // SD Card Symbol
     //
@@ -291,9 +291,9 @@ static void lcd_implementation_status_screen() {
       // Corner pixel
       u8g.drawPixel(50, 43 - (TALL_FONT_CORRECTION));         // 43 (or 42)
     }
-  #endif // SDSUPPORT
+  #endif // SDSUPPORT || FYS_USBDISK
 
-  #if ENABLED(SDSUPPORT) || ENABLED(LCD_SET_PROGRESS_MANUALLY)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK) || ENABLED(LCD_SET_PROGRESS_MANUALLY)
     //
     // Progress bar frame
     //
@@ -355,7 +355,7 @@ static void lcd_implementation_status_screen() {
       lcd_print(buffer);
     }
 
-  #endif // SDSUPPORT || LCD_SET_PROGRESS_MANUALLY
+  #endif // SDSUPPORT  || FYS_USBDISK || LCD_SET_PROGRESS_MANUALLY
 
   //
   // XYZ Coordinates
@@ -448,7 +448,7 @@ static void lcd_implementation_status_screen() {
     //
     // Filament sensor display if SD is disabled
     //
-    #if ENABLED(FILAMENT_LCD_DISPLAY) && DISABLED(SDSUPPORT)
+    #if ENABLED(FILAMENT_LCD_DISPLAY) && DISABLED(SDSUPPORT) && DISABLED(FYS_USBDISK)
       u8g.setPrintPos(56, 50);
       lcd_print(wstring);
       u8g.setPrintPos(102, 50);
@@ -471,7 +471,7 @@ static void lcd_implementation_status_screen() {
   if (PAGE_CONTAINS(STATUS_BASELINE - (INFO_FONT_HEIGHT - 1), STATUS_BASELINE)) {
     u8g.setPrintPos(0, STATUS_BASELINE);
 
-    #if ENABLED(FILAMENT_LCD_DISPLAY) && ENABLED(SDSUPPORT)
+    #if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
       if (PENDING(millis(), previous_lcd_status_ms + 5000UL)) {  //Display both Status message line and Filament display on the last line
         lcd_implementation_status_message(blink);
       }
