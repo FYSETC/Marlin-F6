@@ -18,7 +18,7 @@
 #define __CH376_FS_H__
 
 //#define DEF_INT_TIMEOUT 0 // 一直等
-#define DEF_INT_TIMEOUT 8000000 // 相当于500ms
+#define DEF_INT_TIMEOUT 800000 // 相当于500ms
 #define	EN_DISK_QUERY		1	/* 启用磁盘查询 */
 #define EN_LONG_NAME
 #define	DEF_IC_V43_U	1	/* 推荐定义 DEF_IC_V43_U 以优化代码 */

@@ -6,7 +6,7 @@
 // 其他Arduino芯片暂时不管
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
-#ifdef FYS_USBDISK
+#ifdef FYS_STORAGE_SUPPORT
 
 #include "serial.h"
 
@@ -28,10 +28,11 @@ void	mStopIfError( UINT8 iError )
   	}
   #else
     // 硬件复位之后需要100 ms 的延时
-    WRITE(CH376_RESET_PIN,HIGH);
-    CH376Delayms(10);
-    WRITE(CH376_RESET_PIN,LOW);
-    CH376Delayms(100);
+    // fzl:comment 20190228
+    //WRITE(CH376_RESET_PIN,HIGH);
+    //CH376Delayms(10);
+    //WRITE(CH376_RESET_PIN,LOW);
+    //CH376Delayms(100);
 	#endif		
 }
 

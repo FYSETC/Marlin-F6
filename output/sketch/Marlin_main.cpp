@@ -349,7 +349,7 @@
 
 #if ENABLED(SDSUPPORT)
   CardReader card;
-#elif ENABLED(FYS_USBDISK)
+#elif ENABLED(FYS_STORAGE_SUPPORT)
   USBReader card;
 #endif
 
@@ -1067,7 +1067,7 @@ inline void get_serial_commands() {
 
         gcode_LastN = gcode_N;
       }
-      #if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+      #if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
         else if (card.saving) {
           gcode_line_error(PSTR(MSG_ERR_NO_CHECKSUM));
           return;
@@ -1127,7 +1127,7 @@ inline void get_serial_commands() {
   } // queue has space, serial has data
 }
 
-#if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+#if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
 
   #if ENABLED(PRINTER_EVENT_LEDS) && HAS_RESUME_CONTINUE
     static bool lights_off_after_print; // = false
@@ -1256,7 +1256,7 @@ void get_available_commands() {
     if (job_recovery_phase == JOB_RECOVERY_YES && drain_job_recovery_commands()) return;
   #endif
 
-  #if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
     get_sdcard_commands();
   #endif
 }
@@ -6512,7 +6512,7 @@ inline void gcode_G92() {
       while (wait_for_user) idle();
 
 
-    #if ENABLED(PRINTER_EVENT_LEDS) && (ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK))
+    #if ENABLED(PRINTER_EVENT_LEDS) && (ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT))
       if (lights_off_after_print) {
         leds.set_off();
         lights_off_after_print = false;
@@ -6983,7 +6983,7 @@ inline void gcode_M17() {
     ++did_pause_print;
 
     // Pause the print job and timer
-    #if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+    #if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
       if (card.sdprinting) {
         card.pauseSDPrint();
         ++did_pause_print; // Indicate SD pause also
@@ -7191,7 +7191,7 @@ inline void gcode_M17() {
 
     --did_pause_print;
 
-    #if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+    #if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
       if (did_pause_print) {
         card.startFileprint();
         --did_pause_print;
@@ -7319,7 +7319,7 @@ inline void gcode_M17() {
     }
   }
   
-#elif ENABLED(FYS_USBDISK)
+#elif ENABLED(FYS_STORAGE_SUPPORT)
     /**
      * M20: List SD card to serial output
      */
@@ -7441,7 +7441,7 @@ inline void gcode_M17() {
       }
     }
   
-#endif // SDSUPPORT FYS_USBDISK
+#endif // SDSUPPORT FYS_STORAGE_SUPPORT
 
 /**
  * M31: Get the time since the start of SD Print (or last M109)
@@ -7456,7 +7456,7 @@ inline void gcode_M31() {
   SERIAL_ECHOLNPAIR("Print time: ", buffer);
 }
 
-#if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+#if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
 
   /**
    * M32: Select file and start SD Print
@@ -9270,12 +9270,12 @@ inline void gcode_M121() { endstops.enable_globally(false); }
       park_point.y += (active_extruder ? hotend_offset[Y_AXIS][active_extruder] : 0);
     #endif
 
-    #if DISABLED(SDSUPPORT) && DISABLED(FYS_USBDISK)
+    #if DISABLED(SDSUPPORT) && DISABLED(FYS_STORAGE_SUPPORT)
       const bool job_running = print_job_timer.isRunning();
     #endif
 
     if (pause_print(retract, park_point)) {
-      #if DISABLED(SDSUPPORT) && DISABLED(FYS_USBDISK)
+      #if DISABLED(SDSUPPORT) && DISABLED(FYS_STORAGE_SUPPORT)
         // Wait for lcd click or M108
         wait_for_filament_reload();
 
@@ -12576,7 +12576,7 @@ void process_parsed_command() {
 
       case 17: gcode_M17(); break;                                // M17: Enable all steppers
 
-      #if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+      #if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
         case 20: gcode_M20(); break;                              // M20: List SD Card
         case 21: gcode_M21(); break;                              // M21: Init SD Card
         case 22: gcode_M22(); break;                              // M22: Release SD Card
@@ -12596,7 +12596,7 @@ void process_parsed_command() {
           case 34: gcode_M34(); break;                            // M34: Set SD card sorting options
         #endif
         case 928: gcode_M928(); break;                            // M928: Start SD write
-      #endif // SDSUPPORT||FYS_USBDISK
+      #endif // SDSUPPORT||FYS_STORAGE_SUPPORT
 
       case 31: gcode_M31(); break;                                // M31: Report print job elapsed time
 
@@ -14961,6 +14961,8 @@ void setup() {
     #endif
   #endif
 
+  //if (!card.cardOK) card.initsd(); //fzl:add 20190228
+
   #if ENABLED(POWER_LOSS_RECOVERY)
     SET_INPUT_PULLUP(POWER_LOSS_PIN);
     check_print_job_recovery();
@@ -14984,7 +14986,7 @@ void setup() {
  */
 void loop() {
 
-  #if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
 
     card.checkautostart();
 
@@ -15010,13 +15012,13 @@ void loop() {
       }
     #endif
 
-  #endif // SDSUPPORT||FYS_USBDISK
+  #endif // SDSUPPORT||FYS_STORAGE_SUPPORT
 
   if (commands_in_queue < BUFSIZE) get_available_commands();
 
   if (commands_in_queue) {
 
-    #if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+    #if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
 
       if (card.saving) {
         char* command = command_queue[cmd_queue_index_r];

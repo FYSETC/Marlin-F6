@@ -420,6 +420,11 @@
     "Includepath": ""
   },
   {
+    "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMC2160Stepper.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
     "Sourcefile": "D:\\Documents\\Arduino\\libraries\\TMCStepper\\src\\source\\TMC2208Stepper.cpp",
     "Include": "",
     "Includepath": ""

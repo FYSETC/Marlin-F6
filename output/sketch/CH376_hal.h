@@ -36,6 +36,12 @@
 #include "fastio.h"
 //#include "pins.h"
 
+typedef enum em_storage_type {
+  EMST_SDCARD,
+  EMST_USB_DISK
+}EM_STORAGE_TYPE;
+
+
 /* 附加的USB操作状态定义 */
 #define		ERR_USB_UNKNOWN		0xFA	/* 未知错误,不应该发生的情况,需检查硬件或者程序错误 */
 
@@ -82,7 +88,9 @@ void	xWriteCH376Data( UINT8 mData );	/* 向CH376写数据 */
 
 UINT8	xReadCH376Data( void );			/* 从CH376读数据 */
 
-UINT8	CH376_init( void );			/* 初始化CH376 */
+//UINT8	CH376_init();			/* 初始化CH376 */
+
+UINT8	CH376_init( EM_STORAGE_TYPE storage_type);			/* 初始化CH376 */
 
 UINT8	Query376Interrupt( void );		/* 查询CH376中断(INT#引脚为低电平) */
 

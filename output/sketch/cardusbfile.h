@@ -9,6 +9,7 @@ public:
   USBFile();
   //USBFile(const char* path, uint8_t oflag);
   ~USBFile() { }
+  void init();
   void rewind(); 
   void getFilename(char * const filename);
   void setFilename(char * const filename);
@@ -24,8 +25,10 @@ public:
   bool isOpen();
   void setFileOpenState(bool flag);
   INT16 read();
+  INT16 USBFile::read(void* buf, uint16_t nbyte);
   INT16 fgets(char* str, INT16 num, char* delim);
   void write(UINT8 *pData);
+  int16_t write(const void* buf, uint16_t nbyte);
   bool close();
   int8_t readDir(FAT_DIR_INFO* dir, char* longFilename);
   bool remove(USBFile* dirFile, const char* path);

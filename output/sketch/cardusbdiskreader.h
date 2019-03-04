@@ -25,7 +25,7 @@
 
 #include "MarlinConfig.h"
 
-#if ENABLED(FYS_USBDISK)
+#if ENABLED(FYS_STORAGE_SUPPORT)
 
 #define SD_RESORT ENABLED(SDCARD_SORT_ALPHA) && ENABLED(SDSORT_DYNAMIC_RAM)
 
@@ -177,6 +177,7 @@ public:
     char absFilenameImage[50]; // fzl : to record the IMAGE ABS path short name
   #endif
   int8_t autostart_index;
+  EM_STORAGE_TYPE storageType;
 private:
   //SdFile root, workDir, workDirParents[MAX_DIR_DEPTH];
   //uint8_t workDirDepth;
@@ -245,6 +246,7 @@ private:
 
   #if ENABLED(POWER_LOSS_RECOVERY)
     USBFile jobRecoveryFile;
+    uint32_t jobRecoveryFilesize, jobRecoveryFilesdpos;
   #endif
 
   #if ENABLED(FYS_PRINT_IMAGE_PREVIEW)
@@ -295,12 +297,12 @@ private:
 //extern CardReader card;
 extern USBReader card;
 
-#endif // FYS_USBDISK
+#endif // FYS_STORAGE_SUPPORT
 
 #if ENABLED(SDSUPPORT)
   #define IS_SD_PRINTING (card.sdprinting)
   #define IS_SD_FILE_OPEN (card.isFileOpen())
-#elif ENABLED(FYS_USBDISK)
+#elif ENABLED(FYS_STORAGE_SUPPORT)
   #define IS_SD_PRINTING (card.sdprinting)
   #define IS_SD_FILE_OPEN (card.isFileOpen())
 #else

@@ -581,7 +581,7 @@
     chopconf.hstrt = timings[2] - 1;
     st.CHOPCONF(chopconf.sr);
 
-    // fzl:禁能掉 coolstep
+    // fzl:disable coolstep
     SMARTEN_t smarten{0};
     smarten.sr = 0;
     st.SMARTEN(smarten.sr);

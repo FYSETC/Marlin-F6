@@ -535,7 +535,7 @@
 // Add an 'M73' G-code to set the current percentage
 //#define LCD_SET_PROGRESS_MANUALLY
 
-#if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK) || ENABLED(LCD_SET_PROGRESS_MANUALLY)
+#if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT) || ENABLED(LCD_SET_PROGRESS_MANUALLY)
   //#define LCD_PROGRESS_BAR              // Show a progress bar on HD44780 LCDs for SD printing
   #if ENABLED(LCD_PROGRESS_BAR)
     #define PROGRESS_BAR_BAR_TIME 2000    // (ms) Amount of time to show the bar
@@ -563,7 +563,7 @@
   #endif
 #endif // LED_CONTROL_MENU
 
-#if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+#if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
 
   // Some RAMPS and other boards don't detect when an SD card is inserted. You can work
   // around this by connecting a push button or single throw switch to the pin defined
@@ -590,7 +590,7 @@
    * an option on the LCD screen to continue the print from the last-known
    * point in the file.
    */
-  //#define POWER_LOSS_RECOVERY // USB is not supporting POWER_LOSS_RECOVERY now
+  //#define POWER_LOSS_RECOVERY
   #if ENABLED(POWER_LOSS_RECOVERY)
     #define POWER_LOSS_PIN   64     // Pin to detect power loss
     #define POWER_LOSS_STATE LOW   // State of pin indicating power loss
@@ -867,7 +867,7 @@
 
 // The number of linear motions that can be in the plan at any give time.
 // THE BLOCK_BUFFER_SIZE NEEDS TO BE A POWER OF 2 (e.g. 8, 16, 32) because shifts and ors are used to do the ring-buffering.
-#if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+#if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
   #define BLOCK_BUFFER_SIZE 16 // SD,LCD,Buttons take more memory, block buffer needs to be smaller
 #else
   #define BLOCK_BUFFER_SIZE 16 // maximize block buffer
@@ -900,7 +900,7 @@
   //#define SERIAL_XON_XOFF
 #endif
 
-#if ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK)
+#if ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT)
   // Enable this option to collect and display the maximum
   // RX queue usage after transferring a file to SD.
   //#define SERIAL_STATS_MAX_RX_QUEUED

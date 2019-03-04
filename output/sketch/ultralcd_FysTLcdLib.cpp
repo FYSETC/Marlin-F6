@@ -99,7 +99,7 @@ static FysTLcd myFysTLcd;
 #define MOVE_E_FEEDRATE 3.0
 #define MOVE_XYZ_FEEDRATE 50.0
 
-#if (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)) && PIN_EXISTS(SD_DETECT)
+#if (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)) && PIN_EXISTS(SD_DETECT)
   bool sd_status;
 #endif
 
@@ -287,7 +287,7 @@ static void lcd_event() {
       break;
     
     case LCDEVT_READY_CONTINE_PRINT:
-      #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+      #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
         if (card.longFilename[0]) strncpy(sdFileName, card.longFilename, FYSTLCD_FILENAME_LEN);
         else strncpy(sdFileName, card.filename, FYSTLCD_FILENAME_LEN);
         t = strchr(sdFileName, '.');
@@ -623,7 +623,7 @@ static void filament_unload() {
 
 // valid ：是否更新标志
 static void dwin_update_file_list(bool valid) {  
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
 
     uint8_t fileWindowStartIndex=0;
     if(card.isIndir()) {
@@ -665,7 +665,7 @@ static void dwin_update_file_list(bool valid) {
 static void dwin_file_select(const char *name,const char *longname) {
   if (card.sdprinting) return; 
   
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
     char sdFileName[FYSTLCD_FILENAME_LEN + 1] = { 0 };    
     //card.getfilename(sd_num - 1);                  
     if(longname[0]!=0) {
@@ -689,7 +689,7 @@ static void dwin_file_select(const char *name,const char *longname) {
 }
 
 void lcd_showFilename() {
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
     char sdFileName[FYSTLCD_FILENAME_LEN + 1] = { 0 };    
                   
     if(card.longFilename[0]!=0) {
@@ -1260,7 +1260,7 @@ static void dwin_on_cmd_tool(uint16_t tval) {
 
 #endif // POWER_LOSS_RECOVERY
 
-#if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+#if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
 
   void lcd_sdcard_pause() {
     card.pauseSDPrint();
@@ -1290,12 +1290,12 @@ static void dwin_on_cmd_tool(uint16_t tval) {
     //lcd_return_to_status();
   }
 
-#endif // SDSUPPORT || FYS_USBDISK
+#endif // SDSUPPORT || FYS_STORAGE_SUPPORT
 
 
 static void dwin_on_cmd_print(uint16_t tval)
 {
-#if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+#if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
   if (card.cardOK) {      
     switch (tval) {
       case VARVAL_PRINT_FILELIST:
@@ -1368,7 +1368,7 @@ static void dwin_on_cmd_print(uint16_t tval)
         break;
           
       case VARVAL_PRINT_STOP:
-        if (card.isFileOpen()) {                                  
+        if (card.isFileOpen()) {                           
           #if FYSTLCD_PAGE_EXIST(MAIN)
             lcd_set_page(FTPAGE(MAIN));
           #endif
@@ -2013,7 +2013,7 @@ static void lcd_period_prompt_report() {
     myFysTLcd.ftCmdJump(2);
   #endif
 
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
     if (card.sdprinting)//10A8 print ico
       myFysTLcd.ftCmdPut16(dynamicIcon);
     else
@@ -2058,7 +2058,7 @@ static void lcd_period_report(int16_t s) {
     myFysTLcd.ftCmdPutF16(current_position[i]);
   }
 
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
     static int progress = 0;
     if (IS_SD_PRINTING)progress = card.percentDone();
     if (progress> 100)progress = 0;
@@ -2096,7 +2096,7 @@ static void lcd_period_report(int16_t s) {
     myFysTLcd.ftCmdSend();      
   #endif
 
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
   
     if (IS_SD_PRINTING) {
       myFysTLcd.ftCmdStart(VARADDR_PRINT_TIME);
