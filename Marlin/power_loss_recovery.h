@@ -28,6 +28,7 @@
 #define _POWER_LOSS_RECOVERY_H_
 
 #include "cardreader.h"
+#include "cardusbdiskreader.h"
 #include "types.h"
 #include "MarlinConfig.h"
 

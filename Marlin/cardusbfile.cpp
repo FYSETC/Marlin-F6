@@ -1,6 +1,6 @@
 #include "MarlinConfig.h"
 
-#if ENABLED(FYS_USBDISK)
+#if ENABLED(FYS_STORAGE_SUPPORT)
 #include <string.h>
 #include "Marlin.h"
 #include "cardusbfile.h"
@@ -11,7 +11,21 @@
 
 #include "serial.h"
 
+/** Mask for file/subdirectory tests */
+uint8_t const DIR_ATT_FILE_TYPE_MASK = (ATTR_DIRECTORY | ATTR_VOLUME_ID);
+
+
 USBFile::USBFile(){
+  dirStartClust = 0;
+  memset(name,0,sizeof(name));
+  size = 0;  
+  attr = 0;
+  is_open = false;
+  curPosition_ = 0;
+  writeError = false;
+}
+
+void USBFile::init(){
   dirStartClust = 0;
   memset(name,0,sizeof(name));
   size = 0;  
@@ -56,6 +70,242 @@ void USBFile::setAttr(UINT8 a) {
 // 这个函数由于进行了 FileOpen 操作，不知道会不会打断 marlin 的流程
 // 暂时不用这个函数
 // 这里多层打开 可能会出问题 再想想
+/*
+bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
+  UINT8			s;
+  UINT8   buf[64];
+
+  if (!dirFile || isOpen()) return false;
+
+  // 将当前目录的上级目录的起始簇号设置为当前簇号,相当于打开上级目录
+  // 在同一个目录中的所有文件都保有这 目录其实簇号  
+  SERIAL_ECHO("clust num:");
+  SERIAL_ECHO(dirFile->dirStartClust);
+	CH376WriteVar32( VAR_START_CLUSTER, dirFile->dirStartClust );  
+	SERIAL_ECHO("Directory1: ");
+  CH376DebugOut( path );
+  SERIAL_ECHOLN(path);
+
+  // 打开多级目录下的文件或者目录 
+  s = CH376FileOpenPath( path );  
+	if ( s != USB_INT_SUCCESS && s != ERR_OPEN_DIR ) {
+    mStopIfError(s);
+    return false;
+  }
+  
+  // 文件名
+  memset(name,0,sizeof(name));
+  memcpy(name,path,sizeof(name));
+  //strcpy(name,path);
+  char* const p = &name[0];
+  SERIAL_PROTOCOLLNPAIR("name:", p);
+
+  // 获取目录的起始簇号 
+	dirStartClust = CH376ReadVar32( VAR_START_CLUSTER );  
+	//CH376FileClose( FALSE );  // 对于根目录一定要关闭 
+
+  SERIAL_ECHO("clust num:");
+  SERIAL_ECHO(dirFile->dirStartClust);
+  SERIAL_ECHO("-");
+  SERIAL_ECHO(dirStartClust);
+  
+  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中 
+  s = CH376DirInfoRead( );  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中
+	if ( s != USB_INT_SUCCESS ) {
+    mStopIfError(s);
+    return false;
+  }
+	CH376ReadBlock( buf );  // 从内存缓冲区读取FAT_DIR_INFO数据块,返回长度总是sizeof(FAT_DIR_INFO)
+  CH376EndDirInfo( );  // 获取完FAT_DIR_INFO结构 
+
+  P_FAT_DIR_INFO pDir = (P_FAT_DIR_INFO)buf;  // 当前文件目录信息
+	if ( pDir->DIR_Name[0] != '.' ) {  // 不是本级或者上级目录名则继续,否则必须丢弃不处理
+		if ( pDir->DIR_Name[0] == 0x05 ) pDir->DIR_Name[0] = 0xE5;  // 特殊字符替换
+    attr = pDir->DIR_Attr;
+    size = pDir->DIR_FileSize;    
+  }
+  
+  // 
+  is_open = true;
+
+  return true;
+}
+*/
+
+/*
+bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
+  UINT8			s;
+  UINT8   buf[64];
+  UINT32  startClust = 0;// fzl:20190228 - 目录或文件的起始簇号
+
+  if (!dirFile || isOpen()) return false;
+
+  // 将当前目录的上级目录的起始簇号设置为当前簇号,相当于打开上级目录
+  // 在同一个目录中的所有文件都保有这 目录其实簇号  
+  SERIAL_ECHO("clust num:");
+  SERIAL_ECHO(dirFile->dirStartClust);
+	CH376WriteVar32( VAR_START_CLUSTER, dirFile->dirStartClust );  
+	SERIAL_ECHO("Directory1: ");
+  CH376DebugOut( path );
+  SERIAL_ECHOLN(path);
+
+  // 打开多级目录下的文件或者目录 
+//  s = CH376FileOpenPath( path );  
+  s = CH376FileOpen( path );  
+	if ( s != USB_INT_SUCCESS && s != ERR_OPEN_DIR ) {
+    mStopIfError(s);
+    return false;
+  }
+
+  // 打开目录,仅为了获取目录的起始簇号以提高速度
+	//s = CH376FileOpen( DirStruct[ index ].Name );
+	//if ( s == USB_INT_SUCCESS ) return( ERR_FOUND_NAME );  // 应该是打开了目录,但是返回结果是打开了文件
+	//else if ( s != ERR_OPEN_DIR ) return( s );
+	//CurrentDirStartClust = CH376ReadVar32( VAR_START_CLUSTER );  // 获取目录的起始簇号 
+	//CH376FileClose( FALSE );  // 对于根目录一定要关闭 	
+  
+  // 文件名
+  memset(name,0,sizeof(name));
+  memcpy(name,path,sizeof(name));
+  //strcpy(name,path);
+  char* const p = &name[0];
+  SERIAL_PROTOCOLLNPAIR("name:", p);
+
+  // 获取目录的起始簇号 
+	startClust = CH376ReadVar32( VAR_START_CLUSTER );  
+	//CH376FileClose( FALSE );  // 对于根目录一定要关闭 
+
+  SERIAL_ECHO("clust num:");
+  SERIAL_ECHO(dirFile->dirStartClust);
+  SERIAL_ECHO("-");
+  SERIAL_ECHO(startClust);
+  
+  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中 
+  s = CH376DirInfoRead( );  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中
+	if ( s != USB_INT_SUCCESS ) {
+    mStopIfError(s);
+    return false;
+  }
+	CH376ReadBlock( buf );  // 从内存缓冲区读取FAT_DIR_INFO数据块,返回长度总是sizeof(FAT_DIR_INFO)
+  CH376EndDirInfo( );  // 获取完FAT_DIR_INFO结构 
+
+  P_FAT_DIR_INFO pDir = (P_FAT_DIR_INFO)buf;  // 当前文件目录信息
+	if ( pDir->DIR_Name[0] != '.' ) {  // 不是本级或者上级目录名则继续,否则必须丢弃不处理
+		if ( pDir->DIR_Name[0] == 0x05 ) pDir->DIR_Name[0] = 0xE5;  // 特殊字符替换
+    attr = pDir->DIR_Attr;
+    size = pDir->DIR_FileSize;    
+    if((attr&DIR_ATT_FILE_TYPE_MASK)==ATTR_DIRECTORY) {
+      dirStartClust = startClust;
+    }    
+  }
+  else { // fzl:add 20190228
+    dirStartClust = 0;
+    SERIAL_ECHO("ERROR ERROR!");
+    return false;
+  }
+  
+  // 
+  is_open = true;
+
+  return true;
+}
+*/
+
+bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
+  UINT8			s;
+  UINT8   buf[64];
+  UINT32  startClust = 0;// fzl:20190228 - 目录或文件的起始簇号
+
+  if (!dirFile || isOpen()) return false;
+
+  SERIAL_ECHOLN("USBFile::open");
+
+  // 将当前目录的上级目录的起始簇号设置为当前簇号,相当于打开上级目录
+  // 在同一个目录中的所有文件都保有这 目录其实簇号  
+  //SERIAL_ECHO("clust num:");
+  //SERIAL_ECHO(dirFile->dirStartClust);
+	CH376WriteVar32( VAR_START_CLUSTER, dirFile->dirStartClust );  
+	//SERIAL_ECHO("Directory1: ");
+  //CH376DebugOut( path );
+  //SERIAL_ECHOLN(path);
+
+  // 打开多级目录下的文件或者目录 
+//  s = CH376FileOpenPath( path );  
+  s = CH376FileOpen( path );  
+	if ( s != USB_INT_SUCCESS && s != ERR_OPEN_DIR ) {
+	  //if(oflag == O_READ) {
+      mStopIfError(s);
+      return false;
+    /*
+    }
+    else if(oflag == O_WRITE) {
+      s = CH376FileCreatePath(path);
+      if ( s != USB_INT_SUCCESS ) {
+        SERIAL_PROTOCOLPAIR("create file fail:", job_recovery_file_name);
+        SERIAL_PROTOCOLCHAR('.');
+        SERIAL_EOL();
+        return false;
+      }
+    }
+    */
+  }
+
+  // 打开目录,仅为了获取目录的起始簇号以提高速度
+  /*
+	s = CH376FileOpen( DirStruct[ index ].Name );
+	if ( s == USB_INT_SUCCESS ) return( ERR_FOUND_NAME );  // 应该是打开了目录,但是返回结果是打开了文件
+	else if ( s != ERR_OPEN_DIR ) return( s );
+	CurrentDirStartClust = CH376ReadVar32( VAR_START_CLUSTER );  // 获取目录的起始簇号 
+	CH376FileClose( FALSE );  // 对于根目录一定要关闭 
+	*/
+  
+  // 文件名
+  memset(name,0,sizeof(name));
+  memcpy(name,path,sizeof(name));
+  //strcpy(name,path);
+  char* const p = &name[0];
+  //SERIAL_PROTOCOLLNPAIR("name:", p);
+
+  // 获取目录的起始簇号 
+	startClust = CH376ReadVar32( VAR_START_CLUSTER );  
+	//CH376FileClose( FALSE );  // 对于根目录一定要关闭 
+
+  //SERIAL_ECHO("clust num:");
+  //SERIAL_ECHO(dirFile->dirStartClust);
+  //SERIAL_ECHO("-");
+  //SERIAL_ECHO(startClust);
+  
+  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中 
+  s = CH376DirInfoRead( );  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中
+	if ( s != USB_INT_SUCCESS ) {
+    mStopIfError(s);
+    return false;
+  }
+	CH376ReadBlock( buf );  // 从内存缓冲区读取FAT_DIR_INFO数据块,返回长度总是sizeof(FAT_DIR_INFO)
+  CH376EndDirInfo( );  // 获取完FAT_DIR_INFO结构 
+
+  P_FAT_DIR_INFO pDir = (P_FAT_DIR_INFO)buf;  // 当前文件目录信息
+	if ( pDir->DIR_Name[0] != '.' ) {  // 不是本级或者上级目录名则继续,否则必须丢弃不处理
+		if ( pDir->DIR_Name[0] == 0x05 ) pDir->DIR_Name[0] = 0xE5;  // 特殊字符替换
+    attr = pDir->DIR_Attr;
+    size = pDir->DIR_FileSize;    
+    if((attr&DIR_ATT_FILE_TYPE_MASK)==ATTR_DIRECTORY) {
+      dirStartClust = startClust;
+    }    
+  }
+  else { // fzl:add 20190228
+    dirStartClust = 0;
+    SERIAL_ECHO("USBFile::open ERROR ERROR!");
+    return false;
+  }
+  
+  // 
+  is_open = true;
+
+  return true;
+}
+
+/*
 bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
   UINT8			s;
   UINT8   buf[64];
@@ -67,6 +317,7 @@ bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
 	CH376WriteVar32( VAR_START_CLUSTER, dirFile->dirStartClust );  
 	SERIAL_ECHO("List Directory: ");
   CH376DebugOut( path );
+  SERIAL_ECHOLN(path);
 
   // 打开多级目录下的文件或者目录 
   s = CH376FileOpenPath( path );  
@@ -76,39 +327,53 @@ bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
   }
   
   // 文件名
-  strcpy(name,path);
+  memset(name,0,sizeof(name));
+  memcpy(name,path,sizeof(name));
+  //strcpy(name,path);
+  char* const p = &name[0];
+  SERIAL_PROTOCOLLNPAIR("name:", p);
 
   // 获取目录的起始簇号 
 	dirStartClust = CH376ReadVar32( VAR_START_CLUSTER );  
-	//CH376FileClose( FALSE );  /* 对于根目录一定要关闭 */
+	//CH376FileClose( FALSE );  // 对于根目录一定要关闭 
 
   SERIAL_ECHO("clust num:");
   SERIAL_ECHO(dirFile->dirStartClust);
   SERIAL_ECHO("-");
   SERIAL_ECHO(dirStartClust);
   
-  /* 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中 */
-  s = CH376DirInfoRead( );  /* 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中 */
+  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中 
+  s = CH376DirInfoRead( );  // 读取当前文件的目录信息FAT_DIR_INFO,将相关数据调到内存中
 	if ( s != USB_INT_SUCCESS ) {
     mStopIfError(s);
     return false;
   }
-	CH376ReadBlock( buf );  /* 从内存缓冲区读取FAT_DIR_INFO数据块,返回长度总是sizeof(FAT_DIR_INFO) */
-  CH376EndDirInfo( );  /* 获取完FAT_DIR_INFO结构 */      
+	CH376ReadBlock( buf );  // 从内存缓冲区读取FAT_DIR_INFO数据块,返回长度总是sizeof(FAT_DIR_INFO)
+  CH376EndDirInfo( );  // 获取完FAT_DIR_INFO结构 
 
-  P_FAT_DIR_INFO pDir = (P_FAT_DIR_INFO)buf;  /* 当前文件目录信息 */
-	if ( pDir->DIR_Name[0] != '.' ) {  /* 不是本级或者上级目录名则继续,否则必须丢弃不处理 */
-		if ( pDir->DIR_Name[0] == 0x05 ) pDir->DIR_Name[0] = 0xE5;  /* 特殊字符替换 */
+  P_FAT_DIR_INFO pDir = (P_FAT_DIR_INFO)buf;  // 当前文件目录信息
+	if ( pDir->DIR_Name[0] != '.' ) {  // 不是本级或者上级目录名则继续,否则必须丢弃不处理
+		if ( pDir->DIR_Name[0] == 0x05 ) pDir->DIR_Name[0] = 0xE5;  // 特殊字符替换
     attr = pDir->DIR_Attr;
-    size = pDir->DIR_FileSize;    
+    size = pDir->DIR_FileSize;   
+    // fzl:如果不是目录，则说明文件打开了
+    SERIAL_ECHO("attr:0x");
+    SERIAL_PRINTLN(attr,16);
+    UINT8 a = (attr&DIR_ATT_FILE_TYPE_MASK);
+    SERIAL_ECHO("a:0x");
+    SERIAL_PRINTLN(a,16);
+    if((attr&DIR_ATT_FILE_TYPE_MASK)!=ATTR_DIRECTORY) {
+      dirStartClust = dirFile->dirStartClust;      
+      SERIAL_ECHO("dirStartClust num:");
+      SERIAL_ECHO(dirStartClust);
+    }
   }
-  
-  // 
+
   is_open = true;
 
   return true;
 }
-
+*/
 
 bool USBFile::isOpen() {
   return is_open;
@@ -119,6 +384,8 @@ void USBFile::setFileOpenState(bool flag){
 }
 
 bool USBFile::close() {
+  SERIAL_ECHOLN("USBFile::close");
+
   UINT8 s = CH376FileClose( TRUE );  /* 关闭文件,对于字节读写建议自动更新文件长度 */
   if ( s != USB_INT_SUCCESS ) {
     mStopIfError(s);
@@ -145,19 +412,11 @@ bool USBFile::seekSet(UINT32 pos) {
 }
 
 // 读取一个字节，错误则返回-1
+#if DISABLED(POWER_LOSS_RECOVERY)
 INT16 USBFile::read(){
   UINT8 s;
   UINT8 buffer;
   UINT16 realCnt; // 实际读出来的字节数
-
-  // 以字节为单位移动当前文件指针到上次复制结束位置
-  /*
-  s = CH376ByteLocate( curPosition_ );  
-	  if ( s != USB_INT_SUCCESS ) {
-    mStopIfError(s);
-    return -1;  
-  }
-  */
 
   // 以字节为单位从当前位置读取数据块,返回实际长度在realCnt中 
   s = CH376ByteRead( &buffer, 1, &realCnt );  			
@@ -177,6 +436,140 @@ INT16 USBFile::read(){
   
   return buffer;
 }
+
+#else
+
+// 读取一个字节，错误则返回-1
+INT16 USBFile::read(){
+  UINT8 s;
+  UINT8 buffer;
+  UINT16 realCnt; // 实际读出来的字节数
+
+  /* 将目标文件所在的上级目录的起始簇号设置为当前簇号,相当于打开上级目录 */
+  //SERIAL_ECHO("read clust:");
+  //SERIAL_ECHOLN(dirStartClust);
+  //SERIAL_ECHO("pos:");
+  //SERIAL_ECHOLN(curPosition_);
+  char * const p = &name[0];
+  //SERIAL_PROTOCOLPAIR("name11:", p);
+  //CH376FileClose( FALSE );
+  //SERIAL_ECHO("1o");
+//	CH376WriteVar32( VAR_START_CLUSTER, dirStartClust );
+	CH376WriteVar32( VAR_START_CLUSTER, dirStartClust ); 
+	//SERIAL_ECHO("oo");
+	s = CH376FileOpen( p );  /* 打开文件 采用的是多级目录文件名中，最后的文件名部分*/
+	if ( s != USB_INT_SUCCESS ) {    
+    SERIAL_ECHOLNPGM("bb");
+    mStopIfError(s);
+    return -1;  
+	}
+
+	/* 以字节为单位移动当前文件指针到上次复制结束位置 */
+	s = CH376ByteLocate( curPosition_ );  
+	if ( s != USB_INT_SUCCESS ) {	  
+	  SERIAL_ECHOLNPGM("cc");
+	  mStopIfError(s);
+    return -1;  
+	}
+
+  // 以字节为单位从当前位置读取数据块,返回实际长度在realCnt中 
+  s = CH376ByteRead( &buffer, 1, &realCnt );  			
+  //s = CH376ByteReadOne(&buffer, &realCnt);
+  if ( s != USB_INT_SUCCESS ) {
+    SERIAL_ECHOLNPGM("dd");
+    mStopIfError(s);
+    return -1;  
+  }
+
+  if(realCnt!=1) { // 读取到的和需要读取的字节不一样，应该是到文件末尾了
+    SERIAL_ECHO("readCnt:");
+    SERIAL_PRINTLN(realCnt,10);    
+    return -1;
+  }
+
+  curPosition_++;
+  //SERIAL_ECHO("pos:");
+  //SERIAL_ECHOLN(curPosition_);
+  
+  return buffer;
+}
+#endif
+
+// 读取n个字节，错误则返回-1
+#if DISABLED(POWER_LOSS_RECOVERY)
+INT16 USBFile::read(void* buf, uint16_t nbyte){
+  UINT8 s;
+  //UINT8 buffer;
+  UINT16 realCnt; // 实际读出来的字节数
+
+  uint8_t* dst = reinterpret_cast<uint8_t*>(buf);
+
+  // 以字节为单位从当前位置读取数据块,返回实际长度在realCnt中 
+  s = CH376ByteRead( dst, nbyte, &realCnt );  			
+  //s = CH376ByteReadOne(&buffer, &realCnt);
+  if ( s != USB_INT_SUCCESS ) {
+    mStopIfError(s);
+    return -1;  
+  }
+
+  if(realCnt!=nbyte) { // 读取到的和需要读取的字节不一样，应该是到文件末尾了
+    SERIAL_ECHO("readCnt:");
+    SERIAL_PRINTLN(realCnt,10);    
+    return -1;
+  }
+
+  curPosition_+=realCnt;
+  
+  return realCnt;
+}
+#else
+// 读取n个字节，错误则返回-1
+INT16 USBFile::read(void* buf, uint16_t nbyte){
+  UINT8 s;
+  //UINT8 buffer;
+  UINT16 realCnt; // 实际读出来的字节数
+
+  uint8_t* dst = reinterpret_cast<uint8_t*>(buf);
+
+  /* 将目标文件所在的上级目录的起始簇号设置为当前簇号,相当于打开上级目录 */
+  CH376WriteVar32( VAR_START_CLUSTER, dirStartClust );  
+  char * const p = &name[0];
+  s = CH376FileOpen( p );  /* 打开文件 采用的是多级目录文件名中，最后的文件名部分*/
+  if ( s != USB_INT_SUCCESS ) {
+    SERIAL_ECHOLNPGM("11");
+    mStopIfError(s);    
+    return -1;  
+  }
+
+  /* 以字节为单位移动当前文件指针到上次复制结束位置 */
+  s = CH376ByteLocate( curPosition_ );  
+  if ( s != USB_INT_SUCCESS ) {    
+    SERIAL_ECHOLNPGM("22");
+    mStopIfError(s);
+    return -1;  
+  }
+
+  // 以字节为单位从当前位置读取数据块,返回实际长度在realCnt中 
+  s = CH376ByteRead( dst, nbyte, &realCnt );  			
+  //s = CH376ByteReadOne(&buffer, &realCnt);
+  if ( s != USB_INT_SUCCESS ) {
+    mStopIfError(s);
+    return -1;  
+  }
+
+  if(realCnt!=nbyte) { // 读取到的和需要读取的字节不一样，应该是到文件末尾了
+    SERIAL_ECHO("readCnt:");
+    SERIAL_PRINTLN(realCnt,10);    
+    return -1;
+  }
+
+  curPosition_+=realCnt;
+  SERIAL_ECHO("pos:");
+  SERIAL_ECHOLN(curPosition_);
+  
+  return realCnt;
+}
+#endif
 
 /**
  * Get a string from a file.
@@ -234,8 +627,42 @@ void USBFile::write(UINT8 *pData) {
 
   // 以字节为单位向当前位置写入数据块,不知道是否有最大写入字节的限制
   UINT8 s = CH376ByteWrite( pData, len, NULL );  
-	if(s!=USB_INT_SUCCESS) writeError = true;
-  else writeError = false;
+	if(s!=USB_INT_SUCCESS) {  	
+	  writeError = true;
+	}
+  else {
+    curPosition_++; // fzl:这里是否需要增加当前位置
+    writeError = false;
+  }
+}
+
+int16_t USBFile::write(const void* buf, uint16_t nbyte) {
+  // convert void* to uint8_t*  -  must be before goto statements
+  const uint8_t* src = reinterpret_cast<const uint8_t*>(buf);
+
+  if(!is_open) {
+    SERIAL_ECHO("USB Err");
+    mStopIfError(0);
+  }
+
+  // 先获取pData指向数据大小
+  //UINT16 len=0;
+  //UINT8 *p = pData;
+  //while(p!='\0') { len++; p++;}
+  
+
+  // 以字节为单位向当前位置写入数据块,不知道是否有最大写入字节的限制
+  UINT8 s = CH376ByteWrite( src, nbyte, NULL );  
+	if(s!=USB_INT_SUCCESS) {
+	  writeError = true;
+	  SERIAL_ECHO("USB writeError");
+	  return -1;
+	}
+  else {
+    writeError = false;
+    curPosition_+=nbyte;
+    return nbyte;
+  }
 }
 
 bool USBFile::isDir() {

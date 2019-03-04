@@ -207,7 +207,7 @@
 //////////////////////////
 // LCDs and Controllers //
 //////////////////////////
-
+/*
 #define LCD_PINS_RS         16
 #define LCD_PINS_ENABLE     17
 #define LCD_PINS_D4         23
@@ -221,15 +221,16 @@
 
 #define SD_DETECT_PIN       49
 #define KILL_PIN            41
+*/
 
 // The following three pins must not be redefined for hardware SPI.
 #define CH376_SPI_MOSI_PIN 51       // SPI Master Out Slave In pin
 #define CH376_SPI_MISO_PIN 50       // SPI Master In Slave Out pin
 #define CH376_SPI_SCK_PIN 52         // SPI Clock pin
-#define CH376_SPI_SS_PIN       16
-#define CH376_INT_PIN 17
-#define CH376_BUSY_PIN 23
-#define CH376_RESET_PIN 27
+#define CH376_SPI_SS_PIN       53
+#define CH376_INT_PIN 31
+#define CH376_BUSY_PIN 33
+#define CH376_RESET_PIN 49
 
 
 

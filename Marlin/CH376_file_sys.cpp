@@ -196,7 +196,7 @@ UINT8	Wait376Interrupt( void )  /* 等待CH376中断(INT#低电平)，返回中�
 #ifdef	DEF_INT_TIMEOUT
   #if		DEF_INT_TIMEOUT < 1
   	while ( Query376Interrupt( ) == FALSE );  /* 一直等中断 */
-  	//#ifdef FYS_USBDISK_UART
+  	//#ifdef FYS_STORAGE_UART
       //Serial3.read();  // 先清除接收缓冲区再去获取中断状态码，这里依然可能有问题，
                        // 因为如果是返回了多个字节数据，我们需要清除多个
       //while ( Serial3.available()) Serial3.read();

@@ -22,7 +22,7 @@
 
 #include "MarlinConfig.h"
 
-#if ENABLED(FYS_USBDISK)
+#if ENABLED(FYS_STORAGE_SUPPORT)
 
 #include "cardusbdiskreader.h"
 
@@ -68,6 +68,14 @@ USBReader::USBReader() {
   //power to SD reader
   #if SDPOWER > -1
     OUT_WRITE(SDPOWER, HIGH);
+  #endif
+
+  // storage type
+  #ifdef FYS_STORAGE_SDCARD
+    storageType = EMST_SDCARD;
+  #endif
+  #ifdef FYS_STORAGE_USBMODE
+  storageType = EMST_USB_DISK;
   #endif
 }
 
@@ -235,7 +243,7 @@ UINT16  nrFile_index=0;
 UINT16  dirCnt=0;
 
 /* 例子:列举指定序号的目录下的所有文件 */
-// 输入参数index是指目录在结构中的序号
+// 输入参数index是指目录在DirStruct结构中的序号
 // 如果是获取 nr 则包括了 当前目录，而不是只包括目录下的项目
 UINT8	USBReader::LsDive( UINT8 index , const char * const match/*=NULL*/){		
   UINT8			s;
@@ -247,33 +255,47 @@ UINT8	USBReader::LsDive( UINT8 index , const char * const match/*=NULL*/){
   #ifdef USB_READER_DEBUG
     SERIAL_ECHO("index num:");
     SERIAL_PRINTLN(index,10);
+    SERIAL_ECHO("workDir.DirStartClust:");
+    SERIAL_ECHOLN(DirStruct[ index ].DirStartClust);
   #endif
   
   // 将当前目录的上级目录的起始簇号设置为当前簇号,相当于打开上级目录
-  // 在同一个目录中的所有文件都保有这 目录其实簇号
-	CH376WriteVar32( VAR_START_CLUSTER, DirStruct[ index ].DirStartClust );
+  // 在同一个目录中的所有文件都保有着目录起始簇号
+  /*
+  if(DirStruct[ index ].DirStartClust==0) {
+  	CH376WriteVar32( VAR_START_CLUSTER, DirStruct[ index ].DirStartClust );
 
-	#ifdef USB_READER_DEBUG
-	  SERIAL_ECHO("List Directory: ");
-    CH376DebugOut( DirStruct[ index ].Name );  /* 显示当前要列举的目录名 */
-  #endif
+    char * const p = &DirStruct[ index ].Name[0];
+  	#ifdef USB_READER_DEBUG
+  	  SERIAL_ECHO("List Directory: ");	 
+      CH376DebugOut( p );  // 显示当前要列举的目录名
+    #endif
 
-  // 打开目录,仅为了获取目录的起始簇号以提高速度
-	s = CH376FileOpen( DirStruct[ index ].Name );
-	if ( s == USB_INT_SUCCESS ) return( ERR_FOUND_NAME );  /* 应该是打开了目录,但是返回结果是打开了文件 */
-	else if ( s != ERR_OPEN_DIR ) return( s );
-	CurrentDirStartClust = CH376ReadVar32( VAR_START_CLUSTER );  /* 不是根目录,获取目录的起始簇号 */
-	CH376FileClose( FALSE );  /* 对于根目录一定要关闭 */
+    // 打开目录,仅为了获取目录的起始簇号以提高速度
+  //	s = CH376FileOpen( DirStruct[ index ].Name );
+  	s = CH376FileOpen( p );
+  	if ( s == USB_INT_SUCCESS ) return( ERR_FOUND_NAME );  // 应该是打开了目录,但是返回结果是打开了文件 
+  	else if ( s != ERR_OPEN_DIR ) return( s );
+  	CurrentDirStartClust = CH376ReadVar32( VAR_START_CLUSTER );  // 获取目录的起始簇号 
+  	CH376FileClose( FALSE );  // 对于根目录一定要关闭
 
-  #ifdef USB_READER_DEBUG
-    SERIAL_ECHO("clust num:");
-    SERIAL_ECHO(DirStruct[ index ].DirStartClust);
-    SERIAL_ECHO("-");
-    SERIAL_ECHOLN(CurrentDirStartClust);
-  #endif
+    #ifdef USB_READER_DEBUG
+      SERIAL_ECHO("clust num:");
+      SERIAL_ECHO(DirStruct[ index ].DirStartClust);
+      SERIAL_ECHO(" root clust:");
+      SERIAL_ECHO(root.getDirStartClust());
+      SERIAL_ECHO("-");
+      SERIAL_ECHOLN(CurrentDirStartClust);
+    #endif
+  }
+  else {
+    CurrentDirStartClust = DirStruct[ index ].DirStartClust;
+  }
+  */
   
   // 使用通配符开始枚举
-	CH376WriteVar32( VAR_START_CLUSTER, CurrentDirStartClust );  /* 当前目录的起始簇号,相当于打开当前目录 */
+	//CH376WriteVar32( VAR_START_CLUSTER, CurrentDirStartClust );  /* 当前目录的起始簇号,相当于打开当前目录 */
+	CH376WriteVar32( VAR_START_CLUSTER, DirStruct[ index ].DirStartClust );  /* 当前目录的起始簇号,相当于打开当前目录 */
 	CH376SetFileName( "*" );  /* 设置将要操作的文件的文件名,通配符支持所有文件和子目录 */
 	xWriteCH376Cmd( CMD0H_FILE_OPEN );  /* 枚举文件和目录 */
 	xEndCH376Cmd( );
@@ -293,6 +315,11 @@ UINT8	USBReader::LsDive( UINT8 index , const char * const match/*=NULL*/){
     }
 		return s;
 	}
+
+	#ifdef USB_READER_DEBUG
+    SERIAL_ECHO(" root clust:");
+    SERIAL_ECHO(root.getDirStartClust());
+  #endif
   
 	while ( 1 ) {
 		s = Wait376Interrupt( );
@@ -316,10 +343,21 @@ UINT8	USBReader::LsDive( UINT8 index , const char * const match/*=NULL*/){
 
           // 如果是目录名，我们需要记录起始簇号等
 					if ( filenameIsDir ) { 
-            createFilename(DirStruct[dirCnt].Name, pDir->DIR_Name);
-  					DirStruct[dirCnt].DirStartClust = CurrentDirStartClust;  /* 记录当前目录的起始簇号,用于加快文件打开速度 */
-	  				DirStruct[dirCnt].Attr = pDir->DIR_Attr;  /* 记录文件属性 */
+          	#ifdef USB_READER_DEBUG
+              SERIAL_ECHO(" root clust:");
+              SERIAL_ECHO(root.getDirStartClust());
+            #endif
 
+					  // fzl:20190228,我们由于只进行一层目录的枚举，下面三个就不需要记录了
+            //createFilename(DirStruct[dirCnt].Name, pDir->DIR_Name);
+  					//DirStruct[dirCnt].DirStartClust = CurrentDirStartClust;  /* 记录当前目录的起始簇号,用于加快文件打开速度 */
+	  				//DirStruct[dirCnt].Attr = pDir->DIR_Attr;  /* 记录文件属性 */
+
+            #ifdef USB_READER_DEBUG
+              SERIAL_ECHO(" root clust:");
+              SERIAL_ECHO(root.getDirStartClust());
+            #endif
+            
             // 子目录计数
             dirCnt ++;
             #ifdef USB_READER_DEBUG
@@ -332,11 +370,17 @@ UINT8	USBReader::LsDive( UINT8 index , const char * const match/*=NULL*/){
             CH376DebugOut( pDir->DIR_Name );
           #endif
 
+          // 如果不是 gcode 文件，我们直接继续枚举
           if (!filenameIsDir && (pDir->DIR_Name[8] != 'G' || pDir->DIR_Name[9] == '~')) {
        			xWriteCH376Cmd( CMD0H_FILE_ENUM_GO );  /* 继续枚举文件和目录,先发出下一个命令再分析上行读出的数据可以让CH376与单片机分别同时工作,提高速度 */
       			xEndCH376Cmd( );
             continue;
           }
+
+          #ifdef USB_READER_DEBUG
+            SERIAL_ECHO(" root clust:");
+            SERIAL_ECHO(root.getDirStartClust());
+          #endif
 
           switch (lsAction) {  // 1 based file count
             case LS_Count:
@@ -355,18 +399,32 @@ UINT8	USBReader::LsDive( UINT8 index , const char * const match/*=NULL*/){
               break;
 */
             case LS_GetFilename:
-              strcpy(filenameorigin,pDir->DIR_Name);
+              #ifdef USB_READER_DEBUG
+                SERIAL_ECHO(" rootX clust:");
+                SERIAL_ECHOLN(root.getDirStartClust());
+              #endif
+              memset(filenameorigin,0,sizeof(filenameorigin));
+              strncpy(filenameorigin,pDir->DIR_Name,11);
+              #ifdef USB_READER_DEBUG
+                SERIAL_ECHO(" rootX clust:");
+                SERIAL_ECHOLN(root.getDirStartClust());
+              #endif
+              //strcpy(filenameorigin,pDir->DIR_Name);
               createFilename(filename, pDir->DIR_Name);
               #ifdef USB_READER_DEBUG
                 SERIAL_ECHOLNPAIR("fileCnt:",fileCnt);
                 SERIAL_ECHOLNPAIR("filename:",filename);
+                SERIAL_ECHO(" rootX clust:");
+                SERIAL_ECHOLN(root.getDirStartClust());
               #endif
               if (match != NULL) {
                 if (strcasecmp(match, filename) == 0) return;
               }
               else if (fileCnt == nrFile_index) {
                 #ifdef USB_READER_DEBUG
-                  SERIAL_ECHOLN("return");
+                  SERIAL_ECHO(" rootX clust:");
+                  SERIAL_ECHO(root.getDirStartClust());
+                  SERIAL_ECHOLN("return");                  
                 #endif
                 dirCnt = 0; // 不再循环
                 return USB_INT_SUCCESS;  // 0 based index                
@@ -521,7 +579,7 @@ void USBReader::initsd() {
   cardOK = false;
 
   // 底层驱动的初始化，即sd2card初始化，usb设备则是 CH376等设备的初始化
-  if(ERR_USB_UNKNOWN==CH376_init()) {
+  if(ERR_USB_UNKNOWN==CH376_init(storageType)) {
     SERIAL_ECHOLN("USB init fail");
     return;
   }
@@ -537,16 +595,20 @@ void USBReader::initsd() {
 
   // 我们需要去将 USB 挂载起来
   // 检查U盘是否连接,等待U盘插入,对于SD卡,可以由单片机直接查询SD卡座的插拔状态引脚
-	SERIAL_ECHOLN("USB connecting");
-	while ( CH376DiskConnect( ) != USB_INT_SUCCESS && i<3 ) {  // 等待0.15秒钟
-		CH376Delayms( 50 );
-		i++;
-		SERIAL_ECHOLN("USB connecting");
-	}
-	if(i==3) {
-	  SERIAL_ECHOLN("USB connect fail");
-	  return;
-	}
+  //#ifdef FYS_STORAGE_USBMODE
+  if(storageType == EMST_USB_DISK) {
+  	SERIAL_ECHOLN("USB connecting");
+  	while ( CH376DiskConnect( ) != USB_INT_SUCCESS && i<3 ) {  // 等待0.15秒钟
+  		CH376Delayms( 50 );
+  		i++;
+  		SERIAL_ECHOLN("USB connecting");
+  	}
+  	if(i==3) {
+  	  SERIAL_ECHOLN("USB connect fail");
+  	  return;
+  	}
+  }
+	//#endif	
 
   // 延时,可选操作,有的USB存储器需要几十毫秒的延时
   CH376Delayms( 200 );
@@ -558,7 +620,9 @@ void USBReader::initsd() {
 		//SERIAL_ECHOLNPAIR("s:", s);
 		if ( s == USB_INT_SUCCESS ) break;  /* 准备好 */
 		else if ( s == ERR_DISK_DISCON ) break;  /* 检测到断开,重新检测并计时 */
-		if ( CH376GetDiskStatus( ) >= DEF_DISK_MOUNTED && i >= 5 ) break;  /* 有的U盘总是返回未准备好,不过可以忽略,只要其建立连接MOUNTED且尝试5*50mS */
+		if ( CH376GetDiskStatus( ) >= DEF_DISK_MOUNTED && i >= 5 ) {
+		  break;  /* 有的U盘总是返回未准备好,不过可以忽略,只要其建立连接MOUNTED且尝试5*50mS */
+		}
     //UINT8 st = CH376GetDiskStatus();
     //SERIAL_ECHOLNPAIR("st:", st);
 		//if ( st >= DEF_DISK_MOUNTED && i >= 5 ) break;
@@ -615,6 +679,7 @@ void USBReader::stopSDPrint(
   sdprinting = false;
   
   if (isFileOpen()) file.close();
+  file.init(); // fzl:add 20190228
   #if SD_RESORT
     if (re_sort) presort();
   #endif
@@ -926,9 +991,14 @@ void USBReader::getfilename(uint16_t nr, const char * const match/*=NULL*/) {
 	DirStruct[ 0 ].DirStartClust = workDir.getDirStartClust();
 	DirStruct[ 0 ].Attr = ATTR_DIRECTORY;  /* 根目录也是目录,作为第一个记录保存 */
 
+  #ifdef USB_READER_DEBUG
+	  SERIAL_ECHO("root.DirStartClust:");
+    SERIAL_ECHOLN(root.getDirStartClust());
+  #endif
+
   // 枚举目录,记录保存到结构中,DirCnt会在枚举到为目录时增加
   UINT8 s;
-  UINT16 DirCntOld;
+  UINT16 DirCntOld=0; // fzl:增加=0 20190228
   /*
 	for ( DirCntOld = 0, dirCnt = 1; DirCntOld < dirCnt; DirCntOld ++ ) {  
 		s = LsDive( DirCntOld );  
@@ -936,7 +1006,15 @@ void USBReader::getfilename(uint16_t nr, const char * const match/*=NULL*/) {
 	}*/
 	// 只找当前目录
 	s = LsDive( DirCntOld );  
-	if ( s != USB_INT_SUCCESS ) mStopIfError( s );
+	if ( s != USB_INT_SUCCESS ) {
+	  mStopIfError( s );
+	  cardOK = false;
+	}
+
+  #ifdef USB_READER_DEBUG
+	  SERIAL_ECHO("root.DirStartClust:");
+    SERIAL_ECHOLN(root.getDirStartClust());
+  #endif
 
 	CH376FileClose( FALSE );  /* 关闭 */
 
@@ -1006,9 +1084,16 @@ uint16_t USBReader::getnrfilenames() {
 	DirStruct[ 0 ].DirStartClust = workDir.getDirStartClust();
 	DirStruct[ 0 ].Attr = ATTR_DIRECTORY;  /* 根目录也是目录,作为第一个记录保存 */
 
+  #ifdef USB_READER_DEBUG
+    SERIAL_ECHO("workDir.DirStartClust:");
+    SERIAL_ECHOLN(workDir.getDirStartClust());
+    SERIAL_ECHO("workDir.Name:");
+    char *const p = &DirStruct[0].Name[0];
+    SERIAL_ECHOLN(p);
+  #endif
   
   UINT8 s;
-  UINT16 DirCntOld;
+  UINT16 DirCntOld=0;// fzl:20190228 增加=0
   /*
 	for ( DirCntOld = 0, dirCnt = 1; DirCntOld < dirCnt; DirCntOld ++ ) {  
 		s = LsDive( DirCntOld );  		
@@ -1017,13 +1102,25 @@ uint16_t USBReader::getnrfilenames() {
 	*/
 	// 只找当前目录
 	s = LsDive( DirCntOld );  		
-  if ( s != USB_INT_SUCCESS ) mStopIfError( s );
-		
+  if ( s != USB_INT_SUCCESS ) {    
+    mStopIfError( s );
+    cardOK = false; // fzl:20190228
+  }
+
+  #ifdef USB_READER_DEBUG
+    SERIAL_ECHO("workDir.DirStartClust:");
+    SERIAL_ECHOLN(workDir.getDirStartClust());
+    SERIAL_ECHO("root.DirStartClust:");
+    SERIAL_ECHOLN(root.getDirStartClust());
+  #endif
+  
   CH376FileClose( FALSE );  /* 关闭一下 */
 
   #ifdef USB_READER_DEBUG
     SERIAL_ECHOLN(nrFiles);
   #endif
+
+  dirCnt = 0; // fzl:add20190228
   
   return nrFiles;
 }
@@ -1034,6 +1131,36 @@ uint16_t USBReader::getnrfilenames() {
  * A NULL result indicates an unrecoverable error.
  * 一层一层打开目录
  */
+ /*
+const char* USBReader::diveToFile(USBFile*& curDir, const char * const path, const bool echo) {
+  USBFile myDir;
+  if (path[0] != '/') { curDir = &workDir; return path; }
+
+  curDir = &root;
+  const char *dirname_start = &path[1];
+  while (dirname_start) {
+    char * const dirname_end = strchr(dirname_start, '/');
+    if (dirname_end <= dirname_start) break;
+    const uint8_t len = dirname_end - dirname_start;
+    char dosSubdirname[len + 1];
+    strncpy(dosSubdirname, dirname_start, len);
+    dosSubdirname[len] = 0;
+
+    if (echo) SERIAL_ECHOLN(dosSubdirname);
+
+    if (!myDir.open(curDir, dosSubdirname, O_READ)) {
+      SERIAL_PROTOCOLPAIR(MSG_SD_OPEN_FILE_FAIL, dosSubdirname);
+      SERIAL_PROTOCOLCHAR('.');
+      SERIAL_EOL();
+      return NULL;
+    }
+    curDir = &myDir;
+    dirname_start = dirname_end + 1;
+  }
+  return dirname_start;
+}
+*/
+
 const char* USBReader::diveToFile(USBFile*& curDir, const char * const path, const bool echo) {
   USBFile myDir;
   if (path[0] != '/') { curDir = &workDir; return path; }
@@ -1062,6 +1189,7 @@ const char* USBReader::diveToFile(USBFile*& curDir, const char * const path, con
   return dirname_start;
 }
 
+
 // 这里的主要工作是 
 // 1、查看工作目录是否打开，如果打开就以这个目录为父目录 - 工作目录字节是否为空，如果不为空，则作为前置父目录
 // 2、
@@ -1084,11 +1212,37 @@ void USBReader::chdir(const char * relpath) {
     SERIAL_ECHOLN(relpath);
   }
 */
-
+  UINT8 na[13]="";
   USBFile newDir;
   USBFile *parent = workDir.isOpen() ? &workDir : &root;
+  /*
+  USBFile *parent;
+  if(workDir.isOpen()) {
+    parent = &workDir;
+    SERIAL_ECHOLN("99"); // 如果这里运行了 那么是 getnrfilenames函数改变了 workDir 的 dirStartClust？
+  }
+  else {
+    parent = &root;
+    SERIAL_ECHOLN("66");
+
+    SERIAL_ECHO("parent.DirStartClust:");
+    SERIAL_ECHOLN(parent->getDirStartClust());
+
+    SERIAL_ECHO("root.DirStartClust:");
+    SERIAL_ECHOLN(root.getDirStartClust());
+  }
+  */
   if (newDir.open(parent, relpath, O_READ)) {
     workDir = newDir;
+    /*
+    SERIAL_ECHO("workDir.DirStartClust:");
+    SERIAL_ECHOLN(workDir.getDirStartClust());
+    SERIAL_ECHO("workDir.name:");
+    workDir.getFilename(na);
+    char *const p = na;
+    SERIAL_ECHOLN(p);
+    */
+    
     if (workDirDepth < MAX_DIR_DEPTH)
       workDirParents[workDirDepth++] = workDir;
     #if ENABLED(SDCARD_SORT_ALPHA)
@@ -1099,6 +1253,7 @@ void USBReader::chdir(const char * relpath) {
     SERIAL_ECHO_START();
     SERIAL_ECHOPGM(MSG_SD_CANT_ENTER_SUBDIR);
     SERIAL_ECHOLN(relpath);
+    cardOK = false; // fzl:add 20190227
   }
 
   /*
@@ -1152,7 +1307,22 @@ void USBReader::setroot() {
   root.setFilename("/");
   
   // 这里应该有问题，我们需要重载 ‘=’ ？ // 只要没有动态内存申请函数，用默认拷贝构造函数即可
-  workDir = root; 
+  //workDir = root; 
+
+  // 20190228:这里是不是应该把workDir 打开一下？这样 / 根目录就打开了（好像根目录不需要打开吧，再想想）
+  // 应该是要打开 workDir 这样 root 的 clust 就变成了 2了 试试
+  USBFile newDir;
+  if (newDir.open(&root, "/", O_READ)) {
+    workDir = newDir;
+  }
+  //workDir.open(USBFile * dirFile, "/", O_READ);
+
+  //SERIAL_ECHO("root.DirStartClust:");
+  //SERIAL_ECHOLN(root.getDirStartClust());
+  //SERIAL_ECHO("workDir.DirStartClust:");
+  //SERIAL_ECHOLN(workDir.getDirStartClust());
+
+  
   #if ENABLED(SDCARD_SORT_ALPHA)
     presort();
   #endif
@@ -1452,11 +1622,60 @@ void USBReader::printingHasFinished() {
 
 #if ENABLED(POWER_LOSS_RECOVERY)
 
-  char job_recovery_file_name[4] = "bin";
+  char job_recovery_file_name[13] = "rcvy.bin";
 
   void USBReader::openJobRecoveryFile(const bool read) {
-    if (!cardOK) return;
-    if (jobRecoveryFile.isOpen()) return;
+    if (!cardOK) {
+      SERIAL_ECHOLN("open job card bad");
+      return;
+    }
+    if (jobRecoveryFile.isOpen()) {
+      SERIAL_ECHOLN("open job already open");
+      return;
+    }
+
+    // 通过路径获取到文件所属的目录 curDir，并返回文件名
+    // 相当于 CH376FileOpenDir 功能，不过，在文件打开的过程中，获取了一些文件的属性并记录了
+    // 而 CH376FileOpenDir 只是单纯的去打开目录了
+    USBFile *curDir = &root;
+    //const char * const fname = diveToFile(curDir, job_recovery_file_name, false);
+    //if (!fname) return;
+    const char * const fname = &job_recovery_file_name[0];
+
+    // 最终目标是为了打开最终的文件
+    if (read) {
+      if (jobRecoveryFile.open(curDir, fname, O_READ)) {
+        //jobRecoveryFilesize = jobRecoveryFile.fileSize();
+        //jobRecoveryFilesdpos = 0;
+        SERIAL_PROTOCOLPAIR(MSG_SD_FILE_OPENED, fname);
+        SERIAL_PROTOCOLLNPAIR(MSG_SD_SIZE, filesize);
+        SERIAL_PROTOCOLLNPGM(MSG_SD_FILE_SELECTED);
+      }
+      else {
+        SERIAL_PROTOCOLPAIR(MSG_SD_OPEN_FILE_FAIL, fname);
+        SERIAL_PROTOCOLCHAR('.');
+        SERIAL_EOL();
+      }
+    }
+    else { //write
+      // 如果已经存在了，我们就直接打开文件就行，如果不存在我们就建立文件
+      if (!jobRecoveryFile.open(curDir, fname, O_WRITE)) {
+        UINT8 s = CH376FileCreatePath("/rcvy.bin");
+        if ( s != USB_INT_SUCCESS ) {
+          SERIAL_PROTOCOLPAIR("create file fail:", job_recovery_file_name);
+          SERIAL_PROTOCOLCHAR('.');
+          SERIAL_EOL();
+        }
+      }
+      /*
+      UINT8 s = CH376FileCreatePath("/rcvy.bin");
+      if ( s != USB_INT_SUCCESS ) {
+        SERIAL_PROTOCOLPAIR("create file fail:", job_recovery_file_name);
+        SERIAL_PROTOCOLCHAR('.');
+        SERIAL_EOL();
+      }*/
+    }
+    /*
     if (!jobRecoveryFile.open(&root, job_recovery_file_name, read ? O_READ : O_CREAT | O_WRITE | O_TRUNC | O_SYNC)) {
       SERIAL_PROTOCOLPAIR(MSG_SD_OPEN_FILE_FAIL, job_recovery_file_name);
       SERIAL_PROTOCOLCHAR('.');
@@ -1464,17 +1683,31 @@ void USBReader::printingHasFinished() {
     }
     else if (!read)
       SERIAL_PROTOCOLLNPAIR(MSG_SD_WRITE_TO_FILE, job_recovery_file_name);
+    */
   }
 
   void USBReader::closeJobRecoveryFile() { jobRecoveryFile.close(); }
 
   bool USBReader::jobRecoverFileExists() {
     const bool exists = jobRecoveryFile.open(&root, job_recovery_file_name, O_READ);
-    if (exists) jobRecoveryFile.close();
+    if (exists) {
+      jobRecoveryFile.close();
+      #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+        SERIAL_PROTOCOLLNPGM("---- jobRecoverFileExists. ----");
+      #endif
+    }
+    #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+    else
+      SERIAL_PROTOCOLLNPGM("---- jobRecoverFile not Exists. ----");
+    #endif
+    //jobRecoveryFile.close();
     return exists;
   }
 
   int16_t USBReader::saveJobRecoveryInfo() {
+    #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+      SERIAL_PROTOCOLLNPGM("---- saveJobRecoveryInfo. ----");
+    #endif
     jobRecoveryFile.seekSet(0);
     const int16_t ret = jobRecoveryFile.write(&job_recovery_info, sizeof(job_recovery_info));
     #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
@@ -1488,10 +1721,15 @@ void USBReader::printingHasFinished() {
   }
 
   void USBReader::removeJobRecoveryFile() {
+    #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+      SERIAL_PROTOCOLLNPGM("---- removeJobRecoveryFile. ----");
+    #endif
     job_recovery_info.valid_head = job_recovery_info.valid_foot = job_recovery_commands_count = 0;
     if (jobRecoverFileExists()) {
-      closefile();
-      removeFile(job_recovery_file_name);
+      //closefile();
+      jobRecoveryFile.close();
+      //removeFile(job_recovery_file_name);
+      jobRecoveryFile.remove(&root, job_recovery_file_name);
       #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
         SERIAL_PROTOCOLPGM("Power-loss file delete");
         serialprintPGM(jobRecoverFileExists() ? PSTR(" failed.\n") : PSTR("d.\n"));
@@ -1502,4 +1740,4 @@ void USBReader::printingHasFinished() {
 #endif // POWER_LOSS_RECOVERY
 
 
-#endif // FYS_USBDISK
+#endif // FYS_STORAGE_SUPPORT

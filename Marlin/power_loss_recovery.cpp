@@ -31,6 +31,7 @@
 #include "power_loss_recovery.h"
 
 #include "cardreader.h"
+#include "cardusbdiskreader.h"
 #include "planner.h"
 #include "printcounter.h"
 #include "serial.h"
@@ -116,6 +117,8 @@ void check_print_job_recovery() {
   ZERO(job_recovery_commands);
 
   if (!card.cardOK) card.initsd();
+
+  card.setroot();// fzl:add 20190228
 
   if (card.cardOK) {
 
@@ -272,8 +275,10 @@ void save_job_recovery_info() {
       debug_print_job_recovery(false);
     #endif
 
+    //card.closefile(); // fzl:add 20190228
     card.openJobRecoveryFile(false);
     (void)card.saveJobRecoveryInfo();
+    card.closeJobRecoveryFile(); // fzl:add 20190228
 
     // If power-loss pin was triggered, write just once then kill
     #if PIN_EXISTS(POWER_LOSS)

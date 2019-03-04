@@ -844,7 +844,11 @@
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
 #define INVERT_X_DIR false
+#if Y_DRIVER_TYPE==TMC5160
+#define INVERT_Y_DIR false
+#else
 #define INVERT_Y_DIR true
+#endif
 #define INVERT_Z_DIR true
 
 // @section extruder
@@ -1440,13 +1444,18 @@
 #define DISPLAY_CHARSET_HD44780 JAPANESE
 
 /**
- * USBDISK
+ * USB and SDCARD SUPPORT
+ * 
+ * You can only support SDCARD or USB DISK at a time.
+ * And you need to our CH376 board to support this feature
  */
 
-//#define FYS_USBDISK
-#ifdef FYS_USBDISK // 接口选择
-  #define FYS_USBDISK_SPI     // SPI接口U盘
-  //#define FYS_USBDISK_UART  // UART接口U盘
+#define FYS_STORAGE_SUPPORT
+#ifdef FYS_STORAGE_SUPPORT    
+  #define FYS_STORAGE_SPI     // SPI interface
+  //#define FYS_STORAGE_UART  // UART interface is NOT GOOD at the moment
+  #define FYS_STORAGE_USBMODE  // default storage is set to USB disk
+  //#define FYS_STORAGE_SDCARD     // default storage is set to SD card
 #endif
 
 /**
@@ -1456,7 +1465,9 @@
  * you must uncomment the following option or it won't work.
  *
  */
-#define SDSUPPORT
+#ifndef FYS_STORAGE_SUPPORT
+  #define SDSUPPORT
+#endif
 
 /**
  * SD CARD: SPI SPEED

@@ -296,7 +296,7 @@ void Endstops::event_handler() {
       lcd_status_printf_P(0, PSTR(MSG_LCD_ENDSTOPS " %c %c %c %c"), chrX, chrY, chrZ, chrP);
     #endif
 
-    #if ENABLED(ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED) && (ENABLED(SDSUPPORT)||ENABLED(FYS_USBDISK))
+    #if ENABLED(ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED) && (ENABLED(SDSUPPORT)||ENABLED(FYS_STORAGE_SUPPORT))
       if (planner.abort_on_endstop_hit) {
         card.sdprinting = false;
         card.closefile();

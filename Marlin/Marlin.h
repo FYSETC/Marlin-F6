@@ -205,7 +205,7 @@ void clear_command_queue();
 #endif
 
 #define HAS_LCD_QUEUE_NOW (ENABLED(MALYAN_LCD) || (ENABLED(ULTIPANEL) && (ENABLED(AUTO_BED_LEVELING_UBL) || ENABLED(PID_AUTOTUNE_MENU) || ENABLED(ADVANCED_PAUSE_FEATURE))))
-#define HAS_QUEUE_NOW (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK) ||HAS_LCD_QUEUE_NOW)
+#define HAS_QUEUE_NOW (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT) ||HAS_LCD_QUEUE_NOW)
 #if HAS_QUEUE_NOW
   // Return only when commands are actually enqueued
   void enqueue_and_echo_command_now(const char* cmd);

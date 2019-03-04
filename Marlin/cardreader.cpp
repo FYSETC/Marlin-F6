@@ -959,9 +959,19 @@ void CardReader::printingHasFinished() {
 
   void CardReader::closeJobRecoveryFile() { jobRecoveryFile.close(); }
 
-  bool CardReader::jobRecoverFileExists() {
+  bool CardReader::jobRecoverFileExists() {    
     const bool exists = jobRecoveryFile.open(&root, job_recovery_file_name, O_READ);
-    if (exists) jobRecoveryFile.close();
+    if (exists) {
+      jobRecoveryFile.close();
+      #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+        SERIAL_PROTOCOLLNPGM("Power-loss file exist.");
+      #endif
+    }
+    #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
+    else {      
+      SERIAL_PROTOCOLLNPGM("Power-loss file not exist.");      
+    }
+    #endif
     return exists;
   }
 

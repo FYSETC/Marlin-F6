@@ -10,7 +10,7 @@
 // 其他Arduino芯片暂时不管
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
-#ifdef FYS_USBDISK_UART
+#ifdef FYS_STORAGE_UART
 
 /* 本例中的硬件连接方式如下(实际应用电路可以参照修改下述定义及子程序) */
 /* 单片机的引脚    CH376芯片的引脚

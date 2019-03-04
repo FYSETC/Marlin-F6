@@ -80,7 +80,7 @@ char lcd_status_message[MAX_MESSAGE_LENGTH + 1];
 uint8_t lcd_status_update_delay = 1, // First update one loop delayed
         lcd_status_message_level;    // Higher level blocks lower level
 
-#if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
+#if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT))
   millis_t previous_lcd_status_ms = 0;
 #endif
 
@@ -263,7 +263,7 @@ uint16_t max_display_update_time = 0;
   void menu_action_setting_edit_bool(const char* pstr, bool* ptr);
   void menu_action_setting_edit_callback_bool(const char* pstr, bool* ptr, screenFunc_t callbackFunc);
 
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
     void lcd_sdcard_menu();
     void menu_action_sdfile(CardReader& theCard);
     void menu_action_sddirectory(CardReader& theCard);
@@ -650,7 +650,7 @@ void lcd_status_screen() {
     ENCODER_RATE_MULTIPLY(false);
   #endif
 
-  #if ENABLED(LCD_SET_PROGRESS_MANUALLY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)) && (ENABLED(LCD_PROGRESS_BAR) || ENABLED(DOGLCD))
+  #if ENABLED(LCD_SET_PROGRESS_MANUALLY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)) && (ENABLED(LCD_PROGRESS_BAR) || ENABLED(DOGLCD))
     // Progress bar % comes from SD when actively printing
     if (IS_SD_PRINTING)
       progress_bar_percent = card.percentDone();
@@ -702,7 +702,7 @@ void lcd_status_screen() {
   #if ENABLED(ULTIPANEL)
 
     if (use_click()) {
-      #if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
+      #if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT))
         previous_lcd_status_ms = millis();  // get status message to show up for a while
       #endif
       lcd_implementation_init( // to maybe revive the LCD if static electricity killed it.
@@ -754,7 +754,7 @@ void lcd_reset_status() {
   const char *msg;
   if (print_job_timer.isPaused())
     msg = paused;
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
     else if (card.sdprinting)
       return lcd_setstatus(card.longest_filename(), true);
   #endif
@@ -833,7 +833,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
     line_to_current_z();
   }
 
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
 
     void lcd_sdcard_pause() {
       card.pauseSDPrint();
@@ -863,7 +863,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
       lcd_return_to_status();
     }
 
-  #endif // SDSUPPORT || FYS_USBDISK
+  #endif // SDSUPPORT || FYS_STORAGE_SUPPORT
 
   #if ENABLED(POWER_LOSS_RECOVERY)
 
@@ -1116,7 +1116,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
     MENU_ITEM(submenu, MSG_CONTROL, lcd_control_menu);
 
-    #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+    #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
       if (card.cardOK) {
         if (card.isFileOpen()) {
           if (card.sdprinting)
@@ -1138,7 +1138,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
           MENU_ITEM(gcode, MSG_INIT_SDCARD, PSTR("M21")); // Manually initialize the SD-card via user interface
         #endif
       }
-    #endif // SDSUPPORT || FYS_USBDISK
+    #endif // SDSUPPORT || FYS_STORAGE_SUPPORT
 
     #if ENABLED(LCD_INFO_MENU)
       MENU_ITEM(submenu, MSG_INFO_MENU, lcd_info_menu);
@@ -1813,7 +1813,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
   #endif
 
-  #if (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)) && ENABLED(MENU_ADDAUTOSTART)
+  #if (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)) && ENABLED(MENU_ADDAUTOSTART)
 
     void lcd_autostart_sd() { card.beginautostart(); }
 
@@ -2791,7 +2791,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
     //
     // Autostart
     //
-    #if (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)) && ENABLED(MENU_ADDAUTOSTART)
+    #if (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)) && ENABLED(MENU_ADDAUTOSTART)
       MENU_ITEM(function, MSG_AUTOSTART, lcd_autostart_sd);
     #endif
 
@@ -3958,7 +3958,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
   #endif // FWRETRACT
 
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
 
     #if !PIN_EXISTS(SD_DETECT)
       void lcd_sd_refresh() {
@@ -4049,7 +4049,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
       END_MENU();
     }
 
-  #endif // SDSUPPORT || FYS_USBDISK
+  #endif // SDSUPPORT || FYS_STORAGE_SUPPORT
 
   #if ENABLED(LCD_INFO_MENU)
 
@@ -4959,7 +4959,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
   void menu_action_gcode(const char* pgcode) { enqueue_and_echo_commands_P(pgcode); }
   void menu_action_function(screenFunc_t func) { (*func)(); }
 
-  #if ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK)
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
 
     void menu_action_sdfile(CardReader& theCard) {
       #if ENABLED(SD_REPRINT_LAST_SELECTED_FILE)
@@ -4981,7 +4981,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
       lcd_refresh();
     }
 
-  #endif // SDSUPPORT || FYS_USBDISK
+  #endif // SDSUPPORT || FYS_STORAGE_SUPPORT
 
   void menu_action_setting_edit_bool(const char* pstr, bool* ptr) { UNUSED(pstr); *ptr ^= true; lcd_refresh(); }
   void menu_action_setting_edit_callback_bool(const char* pstr, bool* ptr, screenFunc_t callback) {
@@ -5409,7 +5409,7 @@ void lcd_finishstatus(const bool persist=false) {
   #endif
   lcd_refresh();
 
-  #if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_USBDISK))
+  #if ENABLED(FILAMENT_LCD_DISPLAY) && (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT))
     previous_lcd_status_ms = millis();  //get status message to show up for a while
   #endif
 

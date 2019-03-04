@@ -7,40 +7,22 @@
 #include "MarlinConfig.h"
 //#include "fastio.h"
 //#include "pins.h"
-#include	"CH376_hal.h"
+#include "CH376_hal.h"
 #include "CH376_debug.h"
 #include "pins.h"
 
 
-// 其他Arduino芯片暂时不管
+// Only support 1280 and 2560 at the moment!
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
-#ifdef FYS_USBDISK_SPI
-/*
-#define SCK_PIN          52
-#define MISO_PIN         50
-#define MOSI_PIN         51
-#define CH376_SPI_SS_PIN       53
+#ifdef FYS_STORAGE_SPI
 
-//#define SD_CHIP_SELECT_PIN CH376_SPI_SS_PIN   // The default chip select pin for the SD card is SS.
-// The following three pins must not be redefined for hardware SPI.
-#define CH376_SPI_MOSI_PIN MOSI_PIN       // SPI Master Out Slave In pin
-#define CH376_SPI_MISO_PIN MISO_PIN       // SPI Master In Slave Out pin
-#define CH376_SPI_SCK_PIN SCK_PIN         // SPI Clock pin
-#define CH376_INT_PIN 82
-#define CH376_BUSY_PIN 18
-#define CH376_RESET_PIN 81
-*/
-
-#define SPI_INIT_RATE 2 // 0 最高速 
+#define SPI_INIT_RATE 0 // SPI RATE :  top rate:0 old:2
 
 #define	SPI_IF_TRANS	0x80	/* SPI字节传输完成标志,在SPSR的位7 */
 
-//#define CH376_INT_WIRE	/* 假定CH376的INT#引脚,如果未连接那么也可以通过查询串口中断状态码实现 */
 #define CH376_SPI_BZ  // 是否启用 busy 管脚查询  
 
-
-//#define		SD_DETECT_BYMYSELF
 #define		INT_PIN_INIT	DDRD &= ~_BV(PIND5)
 #define		INT_PIN_SET(x)	if(x)PORTD|=_BV(PIND5);else PORTD&=~_BV(PIND5)
 #define		INT_PIN_VAL	((bool)(PIND&_BV(PIND5)))
@@ -168,7 +150,7 @@ UINT8	Query376Interrupt( void )
   return (READ(CH376_INT_PIN)==HIGH)?FALSE:TRUE;
 }
 
-UINT8	mInitCH376( void )  /* 初始化CH376 */
+UINT8	mInitCH376(   EM_STORAGE_TYPE storage_type )  /* 初始化CH376 */
 {
 	UINT8	res;
 	
@@ -180,11 +162,9 @@ UINT8	mInitCH376( void )  /* 初始化CH376 */
 	CH376DebugOut("USB checking exist!");
 	xWriteCH376Cmd( CMD11_CHECK_EXIST );  
 	xWriteCH376Data( 0x65 );
-	CH376DebugOut("USB 4!");
 	CH376Delayus( 20 );
 	res = xReadCH376Data( );
  	xEndCH376Cmd( );  	
- 	CH376DebugOut("USB 5!");
  	if ( res != 0x9A ) { 
  	  /* 通讯接口不正常,可能原因有:
  	  // 接口连接异常,其它设备影响(片选不唯一),
@@ -194,26 +174,42 @@ UINT8	mInitCH376( void )  /* 初始化CH376 */
  	}
 
   /* 设备USB工作模式 */
-  CH376DebugOut("USB setting USB mode!");
-	xWriteCH376Cmd( CMD11_SET_USB_MODE );  
-	xWriteCH376Data( 0x06 );
-	CH376Delayus( 20 );  // 异步串口方式不需要
-	res = xReadCH376Data( );
-	xEndCH376Cmd( );
-	CH376DebugOutPair("USB set:", res);
+  //#ifdef FYS_STORAGE_USBMODE
+  if(storage_type == EMST_USB_DISK) {
+    CH376DebugOut("USB setting USB mode!");
+  	xWriteCH376Cmd( CMD11_SET_USB_MODE );  
+  	xWriteCH376Data( 0x06 );
+  	CH376Delayus( 20 );  // 异步串口方式不需要
+  	res = xReadCH376Data( );
+  	xEndCH376Cmd( );
+  	CH376DebugOutPair("USB set:", res);
+	}
+	//#endif
+
+  //#ifdef FYS_STORAGE_SDCARD
+  if(storage_type == EMST_SDCARD) {
+  	CH376DebugOut("USB setting SDCARD mode!");
+  	xWriteCH376Cmd( CMD11_SET_USB_MODE );  
+  	xWriteCH376Data( 0x03 );
+  	CH376Delayus( 20 );  // 异步串口方式不需要
+  	res = xReadCH376Data( );
+  	xEndCH376Cmd( );
+  	CH376DebugOutPair("USB set:", res);
+	}
+	//#endif
 	
 	if ( res == CMD_RET_SUCCESS ) return( USB_INT_SUCCESS );
 	else return( ERR_USB_UNKNOWN );  /* 设置模式错误 */
 }
 
 /* 初始化CH376 */
-UINT8	CH376_init( void )  
+UINT8	CH376_init( EM_STORAGE_TYPE storage_type)  
 {
 	CH376Delayms( 100 );  /* 延时100毫秒 */
 	mInitSTDIO( );  /* DEBUG串口初始化 为了让计算机通过串口监控演示过程 */
 	CH376DebugOut( "USB Start" );
 
-	return mInitCH376();
+	return mInitCH376(storage_type);
 }
 
 #endif
