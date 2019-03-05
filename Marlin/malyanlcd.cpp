@@ -46,8 +46,8 @@
 #if ENABLED(MALYAN_LCD)
 
 #if ENABLED(SDSUPPORT)
-  #include "cardreader.h"
-  #include "SdFatConfig.h"
+  #include "sd/cardreader.h"
+  #include "sd/SdFatConfig.h"
 #else
   #define LONG_FILENAME_LENGTH 0
 #endif

@@ -25,7 +25,7 @@
  */
 
 #include "Marlin.h"
-#include "cardreader.h"
+#include "sd/cardreader.h"
 #include "endstops.h"
 #include "temperature.h"
 #include "stepper.h"

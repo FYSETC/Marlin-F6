@@ -30,7 +30,7 @@
 
 #include "power_loss_recovery.h"
 
-#include "cardreader.h"
+#include "sd/cardreader.h"
 #include "cardusbdiskreader.h"
 #include "planner.h"
 #include "printcounter.h"

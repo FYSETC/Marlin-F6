@@ -27,7 +27,7 @@
 #ifndef _POWER_LOSS_RECOVERY_H_
 #define _POWER_LOSS_RECOVERY_H_
 
-#include "cardreader.h"
+#include "sd/cardreader.h"
 #include "cardusbdiskreader.h"
 #include "types.h"
 #include "MarlinConfig.h"

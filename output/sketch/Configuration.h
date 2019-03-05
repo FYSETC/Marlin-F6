@@ -1444,7 +1444,7 @@
 #define DISPLAY_CHARSET_HD44780 JAPANESE
 
 /**
- * USB and SDCARD SUPPORT
+ * USB and SD CARD SUPPORT
  * 
  * You can only support SDCARD or USB DISK at a time.
  * And you need to our CH376 board to support this feature
@@ -1464,9 +1464,25 @@
  * SD Card support is disabled by default. If your controller has an SD slot,
  * you must uncomment the following option or it won't work.
  *
- */
+ *                                                                                       *
+ * The alternative to the SD reader and put a USB Flash reader.                          *
+ * Support for USB thumb drives using an Arduino USB Host Shield or                      *
+ * equivalent MAX3421E breakout board. The USB thumb drive will appear                   *
+ * to MK4duo as an SD card.                                                              *
+ *                                                                                       *
+ * The MAX3421E must be assigned the same pins as the SD card reader, with               *
+ * the following pin mapping:                                                            *
+ *                                                                                       *
+ *    SCLK, MOSI, MISO --> SCLK, MOSI, MISO                                              *
+ *    INT              --> SD_DETECT_PIN                                                 *
+ *    SS               --> SDSS                                                          *
+ *                                                                                       *
+ * define SD support or USB FLASH drive support                                          *
+ *                                                                                       *
+ *****************************************************************************************/
 #ifndef FYS_STORAGE_SUPPORT
   #define SDSUPPORT
+  //#define USB_FLASH_DRIVE_SUPPORT
 #endif
 
 /**

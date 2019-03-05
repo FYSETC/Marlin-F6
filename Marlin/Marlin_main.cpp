@@ -256,7 +256,7 @@
 #include "stepper.h"
 #include "endstops.h"
 #include "temperature.h"
-#include "cardreader.h"
+#include "sd/cardreader.h"
 #include "cardusbdiskreader.h"
 #include "configuration_store.h"
 #include "language.h"

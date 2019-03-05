@@ -5,7 +5,7 @@
 #include "FysTLcdAddrLayout.h"
 #include "Marlin.h"
 #include "language.h"
-#include "cardreader.h"
+#include "sd/cardreader.h"
 #include "cardusbdiskreader.h"
 #include "temperature.h"
 #include "stepper.h"

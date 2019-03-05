@@ -27,7 +27,7 @@
 #include "ultralcd.h"
 #include "Marlin.h"
 #include "language.h"
-#include "cardreader.h"
+#include "sd/cardreader.h"
 #include "temperature.h"
 #include "planner.h"
 #include "stepper.h"
