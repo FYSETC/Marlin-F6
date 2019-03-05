@@ -17,7 +17,12 @@
 
 #ifdef FYS_STORAGE_SPI
 
-#define SPI_INIT_RATE 0 // SPI RATE :  top rate:0 old:2
+// SPI RATE :  top rate:0 old:2
+#ifdef FYS_STORAGE_USBMODE
+#define SPI_INIT_RATE 2 
+#elif defined(FYS_STORAGE_SDCARD)
+#define SPI_INIT_RATE 0
+#endif
 
 #define	SPI_IF_TRANS	0x80	/* SPI字节传输完成标志,在SPSR的位7 */
 
