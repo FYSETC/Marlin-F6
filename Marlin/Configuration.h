@@ -545,13 +545,13 @@
  * :['A4988', 'DRV8825', 'LV8729', 'L6470', 'TB6560', 'TB6600', 'TMC2100', 'TMC2130', 'TMC2130_STANDALONE', 'TMC2208', 'TMC2208_STANDALONE', 'TMC26X', 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130', 'TMC5130_STANDALONE']
  */
  
-#define X_DRIVER_TYPE  TMC5160
-#define Y_DRIVER_TYPE  TMC5160
-#define Z_DRIVER_TYPE  TMC2130
+#define X_DRIVER_TYPE  A4988
+#define Y_DRIVER_TYPE  A4988
+#define Z_DRIVER_TYPE  A4988
 //#define X2_DRIVER_TYPE A4988
 //#define Y2_DRIVER_TYPE A4988
 //#define Z2_DRIVER_TYPE A4988
-#define E0_DRIVER_TYPE TMC2130
+#define E0_DRIVER_TYPE A4988
 //#define E1_DRIVER_TYPE A4988
 //#define E2_DRIVER_TYPE A4988
 //#define E3_DRIVER_TYPE A4988
@@ -1444,29 +1444,30 @@
 #define DISPLAY_CHARSET_HD44780 JAPANESE
 
 /**
- * USB and SDCARD SUPPORT
+ * USB and SD CARD SUPPORT
  * 
  * You can only support SDCARD or USB DISK at a time.
  * And you need to our CH376 board to support this feature
  */
 
-#define FYS_STORAGE_SUPPORT
+//#define FYS_STORAGE_SUPPORT
 #ifdef FYS_STORAGE_SUPPORT    
   #define FYS_STORAGE_SPI     // SPI interface
   //#define FYS_STORAGE_UART  // UART interface is NOT GOOD at the moment
-  #define FYS_STORAGE_USBMODE  // default storage is set to USB disk
-  //#define FYS_STORAGE_SDCARD     // default storage is set to SD card
+  //#define FYS_STORAGE_USBMODE  // default storage is set to USB disk
+  #define FYS_STORAGE_SDCARD     // default storage is set to SD card
 #endif
 
-/**
- * SD CARD
- *
- * SD Card support is disabled by default. If your controller has an SD slot,
- * you must uncomment the following option or it won't work.
- *
- */
+
+  /**
+   * SD CARD
+   *
+   * SD Card support is disabled by default. If your controller has an SD slot,
+   * you must uncomment the following option or it won't work.
+   *
+   */
 #ifndef FYS_STORAGE_SUPPORT
-  #define SDSUPPORT
+  //#define SDSUPPORT
 #endif
 
 /**
@@ -1725,6 +1726,13 @@
 //#define MINIPANEL
 
 //
+// FYSETC Mini Panel with graphic
+// controller and SD support - http://reprap.org/wiki/Mini_panel
+//
+//#define FYSETC_MINIPANEL
+
+
+//
 // MaKr3d Makr-Panel with graphic controller and SD support.
 // http://reprap.org/wiki/MaKr3d_MaKrPanel
 //
@@ -1912,13 +1920,16 @@
  * LED Type. Enable only one of the following two options.
  *
  */
+#if ENABLED(FYSETC_MINIPANEL)
+  #define RGB_LED
+#endif
 //#define RGB_LED
 //#define RGBW_LED
 
 #if ENABLED(RGB_LED) || ENABLED(RGBW_LED)
-  #define RGB_LED_R_PIN 3
-  #define RGB_LED_G_PIN 4
-  #define RGB_LED_B_PIN 9
+  #define RGB_LED_R_PIN 25
+  #define RGB_LED_G_PIN 27
+  #define RGB_LED_B_PIN 29
   #define RGB_LED_W_PIN -1
 #endif
 
