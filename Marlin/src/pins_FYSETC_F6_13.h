@@ -178,10 +178,17 @@
 #define LED_PIN            13
 
 #if ENABLED(RGB_LED) || ENABLED(RGBW_LED)
-  #define RGB_LED_R_PIN    3
-  #define RGB_LED_G_PIN    4
-  #define RGB_LED_B_PIN    9
-  #define RGB_LED_W_PIN    -1
+  #if ENABLED(FYSETC_MINIPANEL)
+    #define RGB_LED_R_PIN    25
+    #define RGB_LED_G_PIN    27
+    #define RGB_LED_B_PIN    29
+    #define RGB_LED_W_PIN    -1
+  #else
+    #define RGB_LED_R_PIN    3
+    #define RGB_LED_G_PIN    4
+    #define RGB_LED_B_PIN    9
+    #define RGB_LED_W_PIN    -1
+  #endif
 #endif
 
 #ifndef FILWIDTH_PIN
@@ -235,12 +242,25 @@
   #define LCD_PINS_D7         29
   #define BEEPER_PIN          37
   
-  #define BTN_EN1             31
-  #define BTN_EN2             33
-  #define BTN_ENC             35
+  #if ENABLED(NEWPANEL)
+    #define BTN_EN1          31
+    #define BTN_EN2          33
+    #define BTN_ENC          35
 
-  #define KILL_PIN            41
+    #define KILL_PIN          41
+
+    #if ENABLED(FYSETC_MINIPANEL)
+      #define LCD_RESET_PIN  23
+      #define DOGLCD_A0      16
+      #define DOGLCD_CS      17
+    #elif ENABLED(MKS_MINI_12864)
+      #define DOGLCD_A0      27
+      #define DOGLCD_CS      25    
+    #endif
+  #endif
 #endif
+
+
 
 
 #if ENABLED(FYS_STORAGE_SUPPORT)

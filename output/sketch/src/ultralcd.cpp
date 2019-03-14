@@ -28,6 +28,7 @@
 #include "Marlin.h"
 #include "language.h"
 #include "sd/cardreader.h"
+#include "mass_storage/cardusbdiskreader.h"
 #include "temperature.h"
 #include "planner.h"
 #include "stepper.h"
@@ -265,8 +266,18 @@ uint16_t max_display_update_time = 0;
 
   #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
     void lcd_sdcard_menu();
-    void menu_action_sdfile(CardReader& theCard);
-    void menu_action_sddirectory(CardReader& theCard);
+    void menu_action_sdfile(
+      #if ENABLED(SDSUPPORT)
+        CardReader& theCard);
+      #else
+        USBReader& theCard);
+      #endif
+    void menu_action_sddirectory(
+      #if ENABLED(SDSUPPORT)
+        CardReader& theCard);
+      #else
+        USBReader& theCard);
+      #endif
   #endif
 
   ////////////////////////////////////////////
@@ -4961,7 +4972,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
   #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
 
-    void menu_action_sdfile(CardReader& theCard) {
+    void menu_action_sdfile(
+      #if ENABLED(SDSUPPORT)
+        CardReader& theCard)
+      #else
+        USBReader& theCard)
+      #endif
+    {
       #if ENABLED(SD_REPRINT_LAST_SELECTED_FILE)
         last_sdfile_encoderPosition = encoderPosition;  // Save which file was selected for later use
       #endif
@@ -4970,7 +4987,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
       lcd_reset_status();
     }
 
-    void menu_action_sddirectory(CardReader& theCard) {
+    void menu_action_sddirectory(
+      #if ENABLED(SDSUPPORT)
+        CardReader& theCard)
+      #else
+        USBReader& theCard)
+      #endif
+    {
       card.chdir(theCard.filename);
       encoderTopLine = 0;
       encoderPosition = 2 * ENCODER_STEPS_PER_MENU_ITEM;

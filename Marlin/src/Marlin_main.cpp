@@ -364,8 +364,9 @@
        G38_endstop_hit = false;
 #endif
 
-uint16_t myLcdEvt = 0x0000;// fysetc
-
+#if ENABLED(FYSTLCD_V1)
+  uint16_t myLcdEvt = 0x0000;// fysetc
+#endif
 
 #if ENABLED(AUTO_BED_LEVELING_UBL)
   #include "ubl.h"
@@ -12924,6 +12925,7 @@ void process_parsed_command() {
       #endif
 
       // gf:add 20190121
+      /*
       case 997: {
         reset_stepper_drivers();
       }break;      
@@ -12935,6 +12937,7 @@ void process_parsed_command() {
         tmc_enable_stealthChop(stepperZ);
         tmc_enable_stealthChop(stepperE0);
       }break;      
+      */
 
       case 999: gcode_M999(); break;                              // M999: Restart after being Stopped
 

@@ -1086,8 +1086,11 @@ static void lcd_implementation_status_screen() {
   }
 
   #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
-
+    #if ENABLED(SDSUPPORT)
     static void lcd_implementation_drawmenu_sd(const bool sel, const uint8_t row, const char* const pstr, CardReader& theCard, const uint8_t concat, const char post_char) {
+    #else
+    static void lcd_implementation_drawmenu_sd(const bool sel, const uint8_t row, const char* const pstr, USBReader& theCard, const uint8_t concat, const char post_char) {
+    #endif    
       UNUSED(pstr);
       lcd.setCursor(0, row);
       lcd.print(sel ? '>' : ' ');

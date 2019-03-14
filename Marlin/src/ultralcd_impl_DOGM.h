@@ -202,7 +202,7 @@
 #elif ENABLED(U8GLIB_SSD1309)
   // Generic support for SSD1309 OLED I2C LCDs
   U8GLIB_SSD1309_128X64 u8g(U8G_I2C_OPT_NONE | U8G_I2C_OPT_FAST);
-#elif ENABLED(MINIPANEL)
+#elif ENABLED(MINIPANEL)||ENABLED(FYSETC_MINIPANEL)
   // The MINIPanel display
   //U8GLIB_MINI12864 u8g(DOGLCD_CS, DOGLCD_A0);  // 8 stripes
   U8GLIB_MINI12864_2X u8g(DOGLCD_CS, DOGLCD_A0); // 4 stripes
@@ -374,6 +374,8 @@ static void lcd_implementation_init() {
   #if DISABLED(MINIPANEL) // setContrast not working for Mini Panel
     u8g.setContrast(lcd_contrast);
   #endif
+
+  u8g.setContrast(255);
 
   #if ENABLED(LCD_SCREEN_ROT_90)
     u8g.setRot90();   // Rotate screen by 90°
@@ -583,8 +585,11 @@ void lcd_implementation_clear() { } // Automatically cleared by Picture Loop
   }
 
   #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
-
+    #if ENABLED(SDSUPPORT)
     static void _drawmenu_sd(const bool isSelected, const uint8_t row, const char* const pstr, CardReader& theCard, const bool isDir) {
+    #else
+    static void _drawmenu_sd(const bool isSelected, const uint8_t row, const char* const pstr, USBReader& theCard, const bool isDir) {
+    #endif
       UNUSED(pstr);
 
       lcd_implementation_mark_as_selected(row, isSelected);
