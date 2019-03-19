@@ -34,7 +34,7 @@
 #include "Sd2Card.h"
 
 #if ENABLED(USE_WATCHDOG)
-  #include "watchdog.h"
+  #include "../watchdog.h"
 #endif
 
 #if DISABLED(SOFTWARE_SPI)

@@ -1467,7 +1467,7 @@
    *
    */
 #ifndef FYS_STORAGE_SUPPORT
-  //#define SDSUPPORT
+  #define SDSUPPORT
 #endif
 
 /**
