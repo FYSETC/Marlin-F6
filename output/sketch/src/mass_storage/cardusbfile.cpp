@@ -136,7 +136,7 @@ bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
 bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
   UINT8			s;
   UINT8   buf[64];
-  UINT32  startClust = 0;// fzl:20190228 - 目录或文件的起始簇号
+  UINT32  startClust = 0;// geo-f:20190228 - 目录或文件的起始簇号
 
   if (!dirFile || isOpen()) return false;
 
@@ -198,7 +198,7 @@ bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
       dirStartClust = startClust;
     }    
   }
-  else { // fzl:add 20190228
+  else { // geo-f:add 20190228
     dirStartClust = 0;
     SERIAL_ECHO("ERROR ERROR!");
     return false;
@@ -214,7 +214,7 @@ bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
 bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
   UINT8			s;
   UINT8   buf[64];
-  UINT32  startClust = 0;// fzl:20190228 - 目录或文件的起始簇号
+  UINT32  startClust = 0;// geo-f:20190228 - 目录或文件的起始簇号
 
   if (!dirFile || isOpen()) return false;
 
@@ -293,7 +293,7 @@ bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
       dirStartClust = startClust;
     }    
   }
-  else { // fzl:add 20190228
+  else { // geo-f:add 20190228
     dirStartClust = 0;
     SERIAL_ECHO("USBFile::open ERROR ERROR!");
     return false;
@@ -356,7 +356,7 @@ bool USBFile::open(USBFile* dirFile, const char* path, uint8_t oflag) {
 		if ( pDir->DIR_Name[0] == 0x05 ) pDir->DIR_Name[0] = 0xE5;  // 特殊字符替换
     attr = pDir->DIR_Attr;
     size = pDir->DIR_FileSize;   
-    // fzl:如果不是目录，则说明文件打开了
+    // geo-f:如果不是目录，则说明文件打开了
     SERIAL_ECHO("attr:0x");
     SERIAL_PRINTLN(attr,16);
     UINT8 a = (attr&DIR_ATT_FILE_TYPE_MASK);
@@ -631,7 +631,7 @@ void USBFile::write(UINT8 *pData) {
 	  writeError = true;
 	}
   else {
-    curPosition_++; // fzl:这里是否需要增加当前位置
+    curPosition_++; // geo-f:这里是否需要增加当前位置
     writeError = false;
   }
 }

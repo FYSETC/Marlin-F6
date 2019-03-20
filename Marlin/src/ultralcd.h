@@ -90,11 +90,11 @@
   void lcd_setstatus(const char* message, const bool persist = false);
   
   #define   lcd_set_page(x)  if(currentPageId!=x){FysTLcd::ftSetPage(x); retPageId =x;currentPageId=x;}
-  #define   lcd_set_page_force(x) do{FysTLcd::ftSetPage(x); retPageId =x;currentPageId=x;} while(0)// fzl
+  #define   lcd_set_page_force(x) do{FysTLcd::ftSetPage(x); retPageId =x;currentPageId=x;} while(0)// geo-f
   #define   lcd_pop_page(x)  if(currentPageId!=x){FysTLcd::ftSetPage(x); currentPageId=x;}
-	//#define   lcd_set_return_page(x) do{retPageId =x;} while(0) // fzl
+	//#define   lcd_set_return_page(x) do{retPageId =x;} while(0) // geo-f
 		
-	inline void lcd_set_return_page(uint16_t x) { retPageId =x;}// fzl
+	inline void lcd_set_return_page(uint16_t x) { retPageId =x;}// geo-f
 	void lcd_set_return_page_print();
 	void lcd_set_page_print();
 	void lcd_set_page_main();
@@ -129,7 +129,7 @@
   #define lcd_refresh()
   #define   lcd_reset_alert_level()
   #define   kill_screen(x)  lcd_popup(x)
-  //#define lcd_detected()    true //fzl:add 20180613
+  //#define lcd_detected()    true //geo-f:add 20180613
 
   extern unsigned long lastSerialCommandTime;
   extern uint8_t led_brightness_level;

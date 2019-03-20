@@ -24,7 +24,7 @@
 
 #include "MarlinConfig.h"
 
-/* fzl
+/* geo-f
 #define A4988               0x001
 #define DRV8825             0x002
 #define LV8729              0x003

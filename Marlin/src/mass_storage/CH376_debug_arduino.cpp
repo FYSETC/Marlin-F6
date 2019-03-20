@@ -28,7 +28,7 @@ void	mStopIfError( UINT8 iError )
   	}
   #else
     // 硬件复位之后需要100 ms 的延时
-    // fzl:comment 20190228
+    // geo-f:comment 20190228
     //WRITE(CH376_RESET_PIN,HIGH);
     //CH376Delayms(10);
     //WRITE(CH376_RESET_PIN,LOW);

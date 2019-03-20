@@ -100,8 +100,8 @@ void reset_stepper_drivers();    // Called by settings.load / settings.reset
     #define X_ENABLE_WRITE(STATE) stepperX.setEnabled(STATE)
     #define X_ENABLE_READ stepperX.isEnabled()
   #elif AXIS_DRIVER_TYPE(X, TMC2660)
-    //#define X_ENABLE_INIT NOOP // fzl
-    //#define X_ENABLE_WRITE(STATE) stepperX.toff((STATE)==X_ENABLE_ON ? stepperX.savedToff() : 0) //fzl
+    //#define X_ENABLE_INIT NOOP // geo-f
+    //#define X_ENABLE_WRITE(STATE) stepperX.toff((STATE)==X_ENABLE_ON ? stepperX.savedToff() : 0) //geo-f
     //#define X_ENABLE_READ stepperX.isEnabled()
     #define X_ENABLE_INIT SET_OUTPUT(X_ENABLE_PIN)
     #define X_ENABLE_WRITE(STATE) WRITE(X_ENABLE_PIN,STATE)

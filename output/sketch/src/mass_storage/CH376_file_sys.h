@@ -107,7 +107,7 @@ UINT8	CH376ByteLocate( UINT32 offset );  /* 以字节为单位移动当前文件
 
 UINT8	CH376ByteRead( PUINT8 buf, UINT16 ReqCount, PUINT16 RealCount );  /* 以字节为单位从当前位置读取数据块 */
 
-UINT8	CH376ByteReadOne( PUINT8 buf, PUINT16 RealCount ); // fzl:add 20181022
+UINT8	CH376ByteReadOne( PUINT8 buf, PUINT16 RealCount ); // geo-f:add 20181022
 
 UINT8	CH376ByteWrite( PUINT8 buf, UINT16 ReqCount, PUINT16 RealCount );  /* 以字节为单位向当前位置写入数据块 */
 

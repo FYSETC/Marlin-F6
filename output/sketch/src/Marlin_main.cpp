@@ -2907,7 +2907,7 @@ void clean_up_after_endstop_or_probe_move() {
       default: break;
       #if X_SENSORLESS
         case X_AXIS:
-          X_ENABLE_WRITE(X_ENABLE_ON); // fzl:add
+          X_ENABLE_WRITE(X_ENABLE_ON); // geo-f:add
           stealth_states.x = tmc_enable_stallguard(stepperX);
           #if CORE_IS_XY && Y_SENSORLESS
             stealth_states.y = tmc_enable_stallguard(stepperY);
@@ -2918,7 +2918,7 @@ void clean_up_after_endstop_or_probe_move() {
       #endif
       #if Y_SENSORLESS
         case Y_AXIS:
-          Y_ENABLE_WRITE(Y_ENABLE_ON); // fzl:add
+          Y_ENABLE_WRITE(Y_ENABLE_ON); // geo-f:add
           stealth_states.y = tmc_enable_stallguard(stepperY);
           #if CORE_IS_XY && X_SENSORLESS
             stealth_states.x = tmc_enable_stallguard(stepperX);
@@ -14961,7 +14961,7 @@ void setup() {
     #endif
   #endif
 
-  //if (!card.cardOK) card.initsd(); //fzl:add 20190228
+  //if (!card.cardOK) card.initsd(); //geo-f:add 20190228
 
   #if ENABLED(POWER_LOSS_RECOVERY)
     SET_INPUT_PULLUP(POWER_LOSS_PIN);

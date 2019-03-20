@@ -1551,7 +1551,7 @@ void MarlinSettings::postprocess() {
             //#endif
           #endif
 
-            // fzl:add 20190116
+            // geo-f:add 20190116
             //#if AXIS_HAS_STALLGUARD(Z)
             //  stepperZ.sgt(63);
             //#endif
@@ -2687,9 +2687,9 @@ void MarlinSettings::reset() {
           SERIAL_EOL();
         #endif
 
-        #define X2_SENSORLESS (defined(X_HOMING_SENSITIVITY) && AXIS_HAS_STALLGUARD(X2))
-        #define Y2_SENSORLESS (defined(Y_HOMING_SENSITIVITY) && AXIS_HAS_STALLGUARD(Y2))
-        #define Z2_SENSORLESS (defined(Z_HOMING_SENSITIVITY) && AXIS_HAS_STALLGUARD(Z2))
+        #define X2_SENSORLESS (defined(X_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(X2))
+        #define Y2_SENSORLESS (defined(Y_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(Y2))
+        #define Z2_SENSORLESS (defined(Z_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(Z2))
         #if X2_SENSORLESS || Y2_SENSORLESS || Z2_SENSORLESS
           say_M914();
           SERIAL_ECHOPGM(" I1");

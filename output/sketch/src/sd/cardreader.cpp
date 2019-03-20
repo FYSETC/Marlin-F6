@@ -258,7 +258,7 @@ void CardReader::initsd() {
 
   #ifndef SPI_SPEED
     //#define SPI_SPEED SPI_FULL_SPEED
-    #define SPI_SPEED 0 // fzl:change 20190307
+    #define SPI_SPEED 0 // geo-f:change 20190307
   #endif
 
   if (!sd2card.init(SPI_SPEED, SDSS)

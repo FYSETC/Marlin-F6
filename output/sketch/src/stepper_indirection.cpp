@@ -563,7 +563,7 @@
 
     static constexpr int8_t timings[] = CHOPPER_DUET_WIFI;//CHOPPER_TIMING; // Default 4, -2, 1
 
-    // fzl :comment 20190110
+    // geo-f :comment 20190110
     /*
     TMC2660_n::CHOPCONF_t chopconf{0};
     chopconf.tbl = 1;
@@ -581,7 +581,7 @@
     chopconf.hstrt = timings[2] - 1;
     st.CHOPCONF(chopconf.sr);
 
-    // fzl:disable coolstep
+    // geo-f:disable coolstep
     SMARTEN_t smarten{0};
     smarten.sr = 0;
     st.SMARTEN(smarten.sr);
@@ -590,7 +590,7 @@
     st.microsteps(microsteps);
     st.intpol(INTERPOLATE);
 
-    // fzl:duet enabled it
+    // geo-f:duet enabled it
     //st.diss2g(true); // Disable short to ground protection. Too many false readings?
     st.diss2g(false);
     st.ts2g(0b11);//0.8us
@@ -815,10 +815,13 @@ void reset_stepper_drivers() {
     #if X_SENSORLESS
       #if AXIS_HAS_STALLGUARD(X)
         stepperX.sgt(X_STALL_SENSITIVITY);
-        stepperX.stall_current_var(X_CURRENT);//fzl 20190111
-        stepperX.stall_current_homing_var(X_STALL_CURRENT);//fzl 20190111
-        stepperX.stall_sentility_var(X_STALL_SENSITIVITY);//fzl 20190111
-        stepperX.stall_sentility_homing_var(X_STALL_SENSITIVITY_HOMING);//fzl 20190111
+        // geo-f : add for TMC2660 driver 20190111
+        #if HAS_DRIVER(TMC2660)      
+          stepperX.stall_current_var(X_CURRENT);
+          stepperX.stall_current_homing_var(X_STALL_CURRENT);
+          stepperX.stall_sentility_var(X_STALL_SENSITIVITY);
+          stepperX.stall_sentility_homing_var(X_STALL_SENSITIVITY_HOMING);
+        #endif
       #endif
       #if AXIS_HAS_STALLGUARD(X2)
         stepperX2.sgt(X_STALL_SENSITIVITY);
@@ -827,10 +830,13 @@ void reset_stepper_drivers() {
     #if Y_SENSORLESS
       #if AXIS_HAS_STALLGUARD(Y)
         stepperY.sgt(Y_STALL_SENSITIVITY);
-        stepperY.stall_current_var(Y_CURRENT);//fzl 20190111
-        stepperY.stall_current_homing_var(Y_STALL_CURRENT);//fzl 20190111
-        stepperY.stall_sentility_var(Y_STALL_SENSITIVITY);//fzl 20190111
-        stepperY.stall_sentility_homing_var(Y_STALL_SENSITIVITY_HOMING);//fzl 20190111
+        // geo-f : add for TMC2660 driver 20190111
+        #if HAS_DRIVER(TMC2660)
+        stepperY.stall_current_var(Y_CURRENT);
+        stepperY.stall_current_homing_var(Y_STALL_CURRENT);
+        stepperY.stall_sentility_var(Y_STALL_SENSITIVITY);
+        stepperY.stall_sentility_homing_var(Y_STALL_SENSITIVITY_HOMING);
+        #endif
       #endif
       #if AXIS_HAS_STALLGUARD(Y2)
         stepperY2.sgt(Y_STALL_SENSITIVITY);
@@ -839,10 +845,13 @@ void reset_stepper_drivers() {
     #if Z_SENSORLESS
       #if AXIS_HAS_STALLGUARD(Z)
         stepperZ.sgt(Z_STALL_SENSITIVITY);
-        stepperZ.stall_current_var(Z_CURRENT);//fzl 20190111
-        stepperZ.stall_current_homing_var(Z_STALL_CURRENT);//fzl 20190111
-        stepperZ.stall_sentility_var(Z_STALL_SENSITIVITY);//fzl 20190111
-        stepperZ.stall_sentility_homing_var(Z_STALL_SENSITIVITY_HOMING);//fzl 20190111
+        // geo-f : add for TMC2660 driver 20190111
+        #if HAS_DRIVER(TMC2660)
+          stepperZ.stall_current_var(Z_CURRENT);
+          stepperZ.stall_current_homing_var(Z_STALL_CURRENT);
+          stepperZ.stall_sentility_var(Z_STALL_SENSITIVITY);
+          stepperZ.stall_sentility_homing_var(Z_STALL_SENSITIVITY_HOMING);
+        #endif
       #endif
       #if AXIS_HAS_STALLGUARD(Z2)
         stepperZ2.sgt(Z_STALL_SENSITIVITY);

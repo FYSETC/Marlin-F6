@@ -348,7 +348,7 @@ UINT8	USBReader::LsDive( UINT8 index , const char * const match/*=NULL*/){
               SERIAL_ECHO(root.getDirStartClust());
             #endif
 
-					  // fzl:20190228,我们由于只进行一层目录的枚举，下面三个就不需要记录了
+					  // geo-f:20190228,我们由于只进行一层目录的枚举，下面三个就不需要记录了
             //createFilename(DirStruct[dirCnt].Name, pDir->DIR_Name);
   					//DirStruct[dirCnt].DirStartClust = CurrentDirStartClust;  /* 记录当前目录的起始簇号,用于加快文件打开速度 */
 	  				//DirStruct[dirCnt].Attr = pDir->DIR_Attr;  /* 记录文件属性 */
@@ -679,7 +679,7 @@ void USBReader::stopSDPrint(
   sdprinting = false;
   
   if (isFileOpen()) file.close();
-  file.init(); // fzl:add 20190228
+  file.init(); // geo-f:add 20190228
   #if SD_RESORT
     if (re_sort) presort();
   #endif
@@ -998,7 +998,7 @@ void USBReader::getfilename(uint16_t nr, const char * const match/*=NULL*/) {
 
   // 枚举目录,记录保存到结构中,DirCnt会在枚举到为目录时增加
   UINT8 s;
-  UINT16 DirCntOld=0; // fzl:增加=0 20190228
+  UINT16 DirCntOld=0; // geo-f:增加=0 20190228
   /*
 	for ( DirCntOld = 0, dirCnt = 1; DirCntOld < dirCnt; DirCntOld ++ ) {  
 		s = LsDive( DirCntOld );  
@@ -1093,7 +1093,7 @@ uint16_t USBReader::getnrfilenames() {
   #endif
   
   UINT8 s;
-  UINT16 DirCntOld=0;// fzl:20190228 增加=0
+  UINT16 DirCntOld=0;// geo-f:20190228 增加=0
   /*
 	for ( DirCntOld = 0, dirCnt = 1; DirCntOld < dirCnt; DirCntOld ++ ) {  
 		s = LsDive( DirCntOld );  		
@@ -1104,7 +1104,7 @@ uint16_t USBReader::getnrfilenames() {
 	s = LsDive( DirCntOld );  		
   if ( s != USB_INT_SUCCESS ) {    
     mStopIfError( s );
-    cardOK = false; // fzl:20190228
+    cardOK = false; // geo-f:20190228
   }
 
   #ifdef USB_READER_DEBUG
@@ -1120,7 +1120,7 @@ uint16_t USBReader::getnrfilenames() {
     SERIAL_ECHOLN(nrFiles);
   #endif
 
-  dirCnt = 0; // fzl:add20190228
+  dirCnt = 0; // geo-f:add20190228
   
   return nrFiles;
 }
@@ -1253,7 +1253,7 @@ void USBReader::chdir(const char * relpath) {
     SERIAL_ECHO_START();
     SERIAL_ECHOPGM(MSG_SD_CANT_ENTER_SUBDIR);
     SERIAL_ECHOLN(relpath);
-    cardOK = false; // fzl:add 20190227
+    cardOK = false; // geo-f:add 20190227
   }
 
   /*

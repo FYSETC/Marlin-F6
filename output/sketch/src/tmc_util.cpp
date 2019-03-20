@@ -119,15 +119,15 @@
       constexpr uint8_t OT_bp = 1;
       TMC_driver_data data;      
       
-      st.rdsel(0b01); // fzl:add 20190109
+      st.rdsel(0b01); // geo-f:add 20190109
       
       data.drv_status = st.DRVSTATUS();
       data.is_otpw = (data.drv_status & OTPW_bm) >> OTPW_bp;
       data.is_ot = (data.drv_status & OT_bm) >> OT_bp;
-      if(data.drv_status&0x01) SERIAL_ECHOLNPGM(" stall detected"); // fzl:add 20190109
+      if(data.drv_status&0x01) SERIAL_ECHOLNPGM(" stall detected"); // geo-f:add 20190109
 
 /*
-      // fzl:20190109
+      // geo-f:20190109
       struct READ_RDSEL01_t *pr;
       pr = (struct READ_RDSEL01_t*)&data.drv_status;
       uint16_t sg_result = pr->sg_result;
@@ -884,76 +884,7 @@
     st.diag1_stall(false);
   }
   #endif
-/*
-  #if HAS_DRIVER(TMC2660)
-  template <char AXIS_LETTER, char DRIVER_ID>
-    bool tmc_enable_stallguard(TMCMarlin<TMC2660Stepper, AXIS_LETTER, DRIVER_ID> &st) {
-      uint16_t a = st.stall_current_homing();
-      SERIAL_ECHOLNPAIR("a1:",a);
-      st.rms_current(a);
-      uint8_t s = st.stall_sentility_homing();
-      SERIAL_ECHOLNPAIR("s1:",s);
-      st.sgt(s);
-      st.sfilt(false);
 
-      return false;
-    }
-    
-  template <char AXIS_LETTER, char DRIVER_ID>
-    void tmc_disable_stallguard(TMCMarlin<TMC2660Stepper, AXIS_LETTER, DRIVER_ID> &st,const bool) {
-      uint16_t a = st.stall_current();
-      SERIAL_ECHOLNPAIR("a2:",a);
-      st.rms_current(a);
-      uint8_t s = st.stall_sentility();
-      SERIAL_ECHOLNPAIR("s2:",s);
-      st.sgt(s);
-      st.sfilt(true);
-
-      return;
-    }
-
-  #endif
-  */
-  /*
-  bool tmc_enable_stallguard(TMC2660Stepper &st) {
-    // TODO
-    // fzl:add 20190110
-    //It should be possible to disable microstepping and 
-    // change steps/mm when you lower current, 
-    // then increase current, move to zero, 
-    // and then re-enable microstepping, and restore the steps/mm.
-    // fzl:可能还需要降低线圈电流
-
-    //st.rms_current(X_STALL_CURRENT);
-    //st.sgt(X_STALL_SENSITIVITY_HOMING);
-    //TMCMarlin<TMC2660Stepper,1,1> *pst = &st;   
-    uint16_t a = st.stall_current();
-    SERIAL_ECHOLNPAIR("a1:",a);
-    st.rms_current(a)
-    uint8_t s = st.stall_sentility_homing();
-    SERIAL_ECHOLNPAIR("s1:",s);
-    st.sgt(s);
-    st.sfilt(false);
-
-    return false;
-  }
-  void tmc_disable_stallguard(TMC2660Stepper &st, const bool) {
-    // fzl:add 20190110 test
-    
-    //st.rms_current(800);
-    //st.sgt(10);
-    //st.sfilt(true);
-    //TMCMarlin<TMC2660Stepper,1,1> *pst = &st;    
-    uint16_t a = st.stall_current();
-    SERIAL_ECHOLNPAIR("a2:",a);
-    st.rms_current(a)
-    uint8_t s = st.stall_sentility();
-    SERIAL_ECHOLNPAIR("s2:",s);
-    st.sgt(s);
-
-    return false;
-  };
-*/
 #endif // USE_SENSORLESS
 
 #if TMC_HAS_SPI
@@ -1085,7 +1016,7 @@ void test_tmc_connection(const bool test_x, const bool test_y, const bool test_z
     */
   }
 
-  //if (axis_connection) ui.set_status_P(PSTR("TMC CONNECTION ERROR")); fzl
+  //if (axis_connection) ui.set_status_P(PSTR("TMC CONNECTION ERROR")); geo-f
   if (axis_connection) serialprintPGM(PSTR("TMC CONNECTION ERROR"));
 }
 

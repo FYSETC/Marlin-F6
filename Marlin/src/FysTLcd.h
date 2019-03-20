@@ -84,7 +84,7 @@
             FYSTLCD_UDRx = dat;
         }
         
-        static bool test; //fzl
+        static bool test; //geo-f
         static uint16_t ftAddr;
         static void ftBegin();
         static void ftEnd();

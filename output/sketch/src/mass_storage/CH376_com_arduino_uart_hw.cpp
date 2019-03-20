@@ -43,7 +43,7 @@ void xEndCH376Cmd()
 
 void	xWriteCH376Cmd( UINT8 mCmd )  /* 向CH376写命令 */
 {
-  // fzl: 原始程序在发送完一个字节后是等待其发送完成的，
+  // geo-f: 原始程序在发送完一个字节后是等待其发送完成的，
   // 但这个 write 函数好像并没有等待，而是放在了发送队列中
   Serial3.write(SER_SYNC_CODE1);
   //Serial3.flush();
@@ -99,7 +99,7 @@ UINT8	mInitCH376( void )  /* 初始化CH376 */
     return( ERR_USB_UNKNOWN );  
   }
   
-  // fzl 20181017
+  // geo-f 20181017
   xWriteCH376Cmd( CMD_RESET_ALL ); 
   CH376DebugOut("The USB module has been reset !");
   delay(200);

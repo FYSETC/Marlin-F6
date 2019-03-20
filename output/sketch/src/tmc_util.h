@@ -58,11 +58,13 @@ class TMCStorage {
     TMCStorage() {}
 
     uint16_t val_mA = 0;
-    // fzl:add 20190111
-    uint8_t val_stall_sentility_homing = 0;
-    uint8_t val_stall_sentility = 0;
-    uint16_t val_stall_current = 0;
-    uint16_t val_stall_current_homing = 0;
+    // geo-f: support TMC2660 senseless homing
+    #if HAS_DRIVER(TMC2660)
+      uint8_t val_stall_sentility_homing = 0;
+      uint8_t val_stall_sentility = 0;
+      uint16_t val_stall_current = 0;
+      uint16_t val_stall_current_homing = 0;
+    #endif
 
   public:
     #if ENABLED(MONITOR_DRIVER_STATUS)
@@ -111,19 +113,21 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
       this->val_mA = mA;
       TMC::rms_current(mA, mult);
     }
-    // fzl:add 20190111
-    void stall_sentility_homing_var(uint8_t val) {
-      this->val_stall_sentility_homing = val;
-    }       
-    void stall_sentility_var(uint8_t val) {
-      this->val_stall_sentility = val;
-    }     
-    void stall_current_var(uint16_t val) {
-      this->val_stall_current = val;
-    }
-    void stall_current_homing_var(uint16_t val) {
-      this->val_stall_current_homing = val;
-    }
+    // geo-f:add 20190111
+    #if HAS_DRIVER(TMC2660)
+      void stall_sentility_homing_var(uint8_t val) {
+        this->val_stall_sentility_homing = val;
+      }       
+      void stall_sentility_var(uint8_t val) {
+        this->val_stall_sentility = val;
+      }     
+      void stall_current_var(uint16_t val) {
+        this->val_stall_current = val;
+      }
+      void stall_current_homing_var(uint16_t val) {
+        this->val_stall_current_homing = val;
+      }
+    #endif
 };
 template<char AXIS_LETTER, char DRIVER_ID>
 class TMCMarlin<TMC2208Stepper, AXIS_LETTER, DRIVER_ID> : public TMC2208Stepper, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
@@ -224,7 +228,7 @@ void test_tmc_connection(const bool test_x, const bool test_y, const bool test_z
     bool x, y, z;
   };
 
-   #if HAS_DRIVER(TMC2130) // fzl
+   #if HAS_DRIVER(TMC2130) // geo-f
     bool tmc_enable_stallguard(TMC2130Stepper &st);
     void tmc_disable_stallguard(TMC2130Stepper &st, const bool restore_stealth);
   #endif
@@ -265,10 +269,7 @@ void test_tmc_connection(const bool test_x, const bool test_y, const bool test_z
         return;
       }
   #endif
-/*
-  bool tmc_enable_stallguard(TMC2660Stepper &st);
-  void tmc_disable_stallguard(TMC2660Stepper &st, const bool);
-  */
+
 #endif
 
 #if TMC_HAS_SPI

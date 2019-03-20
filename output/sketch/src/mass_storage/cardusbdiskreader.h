@@ -174,7 +174,7 @@ public:
   char filenameorigin[FILENAME_LENGTH];
   #if ENABLED(FYS_PRINT_IMAGE_PREVIEW)
     char filenameImage[FILENAME_LENGTH], longFilenameImage[LONG_FILENAME_LENGTH];
-    char absFilenameImage[50]; // fzl : to record the IMAGE ABS path short name
+    char absFilenameImage[50]; // geo-f : to record the IMAGE ABS path short name
   #endif
   int8_t autostart_index;
   EM_STORAGE_TYPE storageType;

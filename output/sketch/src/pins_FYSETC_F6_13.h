@@ -105,7 +105,6 @@
 
 
 #if HAS_DRIVER(TMC2208)
-
   /**
    * TMC2208 stepper drivers
    *
@@ -127,25 +126,18 @@
   /**
   * Software serial
   */
-
-  #define X_SERIAL_RX_PIN       71
+  #define X_SERIAL_RX_PIN       -1 //71
   #define X_SERIAL_TX_PIN       72
-
-  #define Y_SERIAL_RX_PIN       73
+  #define Y_SERIAL_RX_PIN       -1 //73
   #define Y_SERIAL_TX_PIN       75
-
-  #define Z_SERIAL_RX_PIN       78
+  #define Z_SERIAL_RX_PIN       -1 //78
   #define Z_SERIAL_TX_PIN       79
-
-  #define E0_SERIAL_RX_PIN      76
+  #define E0_SERIAL_RX_PIN      -1 //76
   #define E0_SERIAL_TX_PIN      77
-
-  #define E1_SERIAL_RX_PIN      80
+  #define E1_SERIAL_RX_PIN      -1 //80
   #define E1_SERIAL_TX_PIN      81
-
-  #define E2_SERIAL_RX_PIN      22
-  #define E2_SERIAL_TX_PIN      83
- 
+  #define E2_SERIAL_RX_PIN      -1 //22
+  #define E2_SERIAL_TX_PIN      83 
 #endif
 
 //

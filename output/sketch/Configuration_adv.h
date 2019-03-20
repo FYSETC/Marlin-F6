@@ -1125,13 +1125,17 @@
   #define R_SENSE           0.11  // R_sense resistor for SilentStepStick2130
 #endif
 
-#if AXIS_DRIVER_TYPE(X, TMC5160)
-  #define X_R_SENSE         0.075 // 5160
-#endif
-  #define X_R_SENSE         0.075 // 5160
-  #define Y_R_SENSE         0.11
-  #define Z_R_SENSE         0.11
-  #define E0_R_SENSE        0.11
+  #define X_R_SENSE         R_SENSE
+  #define X2_R_SENSE        R_SENSE
+  #define Y_R_SENSE         R_SENSE
+  #define Y2_R_SENSE        R_SENSE
+  #define Z_R_SENSE         R_SENSE
+  #define Z2_R_SENSE        R_SENSE
+  #define E0_R_SENSE        R_SENSE
+  #define E1_R_SENSE        R_SENSE
+  #define E2_R_SENSE        R_SENSE
+  #define E3_R_SENSE        R_SENSE
+  #define E4_R_SENSE        R_SENSE
 
   #define HOLD_MULTIPLIER    0.5  // Scales down the holding current from run current
   #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
@@ -1169,8 +1173,8 @@
   #define E4_CURRENT         800
   #define E4_MICROSTEPS       16
 
-  #define E5_CURRENT         800 //fzl:add
-  #define E5_MICROSTEPS       16 //fzl:add
+  #define E5_CURRENT         800 //geo-f:add
+  #define E5_MICROSTEPS       16 //geo-f:add
   /**
    * Use software SPI for TMC2130.
    * The default SW SPI pins are defined the respective pins files,
@@ -1187,11 +1191,13 @@
    */
 #if HAS_DRIVER(TMC2130)||HAS_DRIVER(TMC5160)
   #define STEALTHCHOP
+  #if ENABLED(STEALTHCHOP)
+    #define STEALTHCHOP_XY 
+    #define STEALTHCHOP_Z  
+    #define STEALTHCHOP_E  
+  #endif
 #endif
-  //#define STEALTHCHOP
-  #define STEALTHCHOP_XY // gf:add
-  #define STEALTHCHOP_Z  // gf:add
-  #define STEALTHCHOP_E  // gf:add
+
 
   // gf:add
   /**
@@ -1261,27 +1267,35 @@
    * It is advised to set X/Y/Z_HOME_BUMP_MM to 0.
    * M914 X/Y/Z to live tune the setting
    */
-  //#define SENSORLESS_HOMING // TMC2130 only
-
+  #define SENSORLESS_HOMING // TMC2130 only
+  /*
   #if ENABLED(SENSORLESS_HOMING)
     #define X_HOMING_SENSITIVITY  8
     #define Y_HOMING_SENSITIVITY  8
     #define Z_HOMING_SENSITIVITY  8
   #endif
-
-  // gf:add
+  */
+  
   #if ENABLED(SENSORLESS_HOMING) || ENABLED(SENSORLESS_PROBING)
-    #define X_STALL_SENSITIVITY  63 // fzl:old 10
-    #define Y_STALL_SENSITIVITY  63 // fzl:old 15
-    //#define Z_STALL_SENSITIVITY  8
+    #define X_STALL_SENSITIVITY  8
+    #define Y_STALL_SENSITIVITY  8
+    #define Z_STALL_SENSITIVITY  8
 
-    // gf:add 20190111:direction:low current increase homing feedrate and adjust STALL_SENSITIVITY value
-    #define X_STALL_CURRENT   500 // 400
-    #define X_STALL_SENSITIVITY_HOMING  7 // 6
+    #if HAS_DRIVER(TMC2660)
+      #define X_STALL_SENSITIVITY  63 // geo-f:old 10
+      #define Y_STALL_SENSITIVITY  63 // geo-f:old 15
+      //#define Z_STALL_SENSITIVITY  8
 
-    #define Y_STALL_CURRENT   600//600
-    #define Y_STALL_SENSITIVITY_HOMING  11 // 10
+      // geo-f : fine adjust the value below , these values only work on sensorless homing action
+      // low current increase homing feedrate and adjust STALL_SENSITIVITY value
+      #define X_STALL_CURRENT   500 // 400
+      #define X_STALL_SENSITIVITY_HOMING  7 // 6
+
+      #define Y_STALL_CURRENT   600//600
+      #define Y_STALL_SENSITIVITY_HOMING  11 // 10  
+    #endif
   #endif
+  
   /**
    * Enable M122 debugging command for TMC stepper drivers.
    * M122 S0/1 will enable continous reporting.

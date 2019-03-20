@@ -25,7 +25,7 @@
 #define _USB_HOST_H_
 
 
-// fzl:add 20190307
+// geo-f:add 20190307
 // SPI speed is F_CPU/2^(1 + index), 0 <= index <= 6
 uint8_t const SPI_FULL_SPEED = 0,         // Set SCK to max rate of F_CPU/2. See Sd2Card::setSckRate().
               SPI_HALF_SPEED = 1,         // Set SCK rate to F_CPU/4. See Sd2Card::setSckRate().

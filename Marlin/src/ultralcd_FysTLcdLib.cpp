@@ -456,14 +456,14 @@ static void moveAxis(AxisEnum axis, float val) {
 //  if (current_position[axis] < 0&&axis<E_AXIS)current_position[axis] = 0;
 //  planner.buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], movFeedrate>0.0 ? movFeedrate : pgm_read_float(&homing_feedrate_mm_s[axis]), active_extruder);
 
-		if(planner.movesplanned()!=0) return; // fzl:add 20180716
+		if(planner.movesplanned()!=0) return; // geo-f:add 20180716
 
     if(axis==E_AXIS) {           
       if(thermalManager.degHotend(active_extruder) > 180) {
         // Get the new position
         current_position[axis] += val;
 
-        // fzl : add 20180607 , FLYING_BEAR
+        // geo-f : add 20180607 , FLYING_BEAR
         movFeedrate = MOVE_E_FEEDRATE;
       }
       else {
@@ -1047,7 +1047,7 @@ static void dwin_on_cmd_tool(uint16_t tval) {
       
     case VARVAL_TOOL_AUTO_LEVELING:
       zprobe_zoffset -=0.3;
-      dwin_popup(PSTR("\n    Leveling is in progress."),EPPT_INFO_WAITING); // fzl : comment 20180608
+      dwin_popup(PSTR("\n    Leveling is in progress."),EPPT_INFO_WAITING); // geo-f : comment 20180608
       enqueue_and_echo_commands_P(PSTR("G28"));
       enqueue_and_echo_commands_P(PSTR("G29"));
       break;
@@ -1694,12 +1694,13 @@ static void dwin_on_cmd(millis_t& tNow) {
 	#endif
 
   uint16_t tval = FysTLcd::ftCmdVal16();
-      // fzl 
-  //SERIAL_ECHOPGM(" Addr:");
-  //reportCmdContent(FysTLcd::ftAddr);
-  //SERIAL_ECHOPGM(" Val:");
-  //reportCmdContent(tval);
-  
+  // geo-f 
+  /*
+  SERIAL_ECHOPGM(" Addr:");
+  reportCmdContent(FysTLcd::ftAddr);
+  SERIAL_ECHOPGM(" Val:");
+  reportCmdContent(tval);
+  */
   uint8_t cmd[2];
   switch (FysTLcd::ftAddr) {
   case VARADDR_TOOL:
@@ -1891,7 +1892,7 @@ static void dwin_on_cmd(millis_t& tNow) {
   case VARADDR_JUMP_PAGE:
       retPageId = tval; 
       currentPageId = tval;
-      //SERIAL_ECHOPGM("Page to"); // fzl
+      //SERIAL_ECHOPGM("Page to"); // geo-f
       //MYSERIAL0.println((int)tval);
       break;
       
@@ -2074,7 +2075,7 @@ static void lcd_period_report(int16_t s) {
   #endif
   myFysTLcd.ftCmdSend();
   
-  // fzl : zprope offset
+  // geo-f : zprope offset
   #if HAS_BED_PROBE
     myFysTLcd.ftCmdStart(VARADDR_ZOFFSET_DATA);
     myFysTLcd.ftCmdPutF16_2(zprobe_zoffset);
@@ -2418,7 +2419,7 @@ static void readParam_Motor() {
       {
           myFysTLcd.ftCmdGetF32(planner.axis_steps_per_mm[i]);
       }
-			planner.refresh_positioning(); // fzl:20180726
+			planner.refresh_positioning(); // geo-f:20180726
       for (uint8_t i = 0; i < 4; i++)
       {
           myFysTLcd.ftCmdGetF32(planner.max_feedrate_mm_s[i]);
@@ -2709,8 +2710,8 @@ static void sendParam_Leveling()
     // Global Leveling
 #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
     myFysTLcd.ftCmdPutF32(planner.z_fade_height);
-#elif ABL_PLANAR // fzl : add
-        myFysTLcd.ftCmdPutF32(zprobe_zoffset); // fzl : add
+#elif ABL_PLANAR // geo-f : add
+        myFysTLcd.ftCmdPutF32(zprobe_zoffset); // geo-f : add
 #else
     myFysTLcd.ftCmdJump(4);
 #endif

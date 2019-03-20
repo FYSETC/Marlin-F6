@@ -5,7 +5,7 @@
 
 #ifdef FYSTLCD_V1
 
-  bool FysTLcd::test = false; //fzl
+  bool FysTLcd::test = false; //geo-f
   volatile bool FysTLcd::ftRecvData = false;
   uint8_t FysTLcd::ftDataLen = 0;
   uint16_t FysTLcd::ftAddr = 0;
@@ -198,32 +198,32 @@
       ftWrite((uint8_t)varAddr);
 
       if(test){
-        SERIAL_PRINT(FYSTLCD_FRAM_HEAD1,16); // fzl:test
-        SERIAL_ECHO(' '); // fzl:test
+        SERIAL_PRINT(FYSTLCD_FRAM_HEAD1,16); // geo-f:test
+        SERIAL_ECHO(' '); // geo-f:test
         delay(2);
-        SERIAL_PRINT(FYSTLCD_FRAM_HEAD2,16); // fzl:test
-        SERIAL_ECHO(' '); // fzl:test
+        SERIAL_PRINT(FYSTLCD_FRAM_HEAD2,16); // geo-f:test
+        SERIAL_ECHO(' '); // geo-f:test
         delay(2);
-        SERIAL_PRINT(len + 3,16); // fzl:test
-        SERIAL_ECHO(' '); // fzl:test
+        SERIAL_PRINT(len + 3,16); // geo-f:test
+        SERIAL_ECHO(' '); // geo-f:test
         delay(2);
-        SERIAL_PRINT(FYSTLCD_WRITE_VAR,16); // fzl:test
-        SERIAL_ECHO(' '); // fzl:test
+        SERIAL_PRINT(FYSTLCD_WRITE_VAR,16); // geo-f:test
+        SERIAL_ECHO(' '); // geo-f:test
         delay(2);
-        SERIAL_PRINT((uint8_t)(varAddr >> 8),16); // fzl:test
-        SERIAL_ECHO(' '); // fzl:test
+        SERIAL_PRINT((uint8_t)(varAddr >> 8),16); // geo-f:test
+        SERIAL_ECHO(' '); // geo-f:test
         delay(2);
-        SERIAL_PRINT((uint8_t)varAddr,16); // fzl:test
-        SERIAL_ECHO(' '); // fzl:test
+        SERIAL_PRINT((uint8_t)varAddr,16); // geo-f:test
+        SERIAL_ECHO(' '); // geo-f:test
         delay(2);
       }
     #endif
     
     while (len-- > 0) {
       if(test){
-        SERIAL_PRINT(*varData,16); // fzl:test
+        SERIAL_PRINT(*varData,16); // geo-f:test
         delay(2);
-        SERIAL_ECHO(' '); // fzl:test
+        SERIAL_ECHO(' '); // geo-f:test
       }
       ftWrite(*varData++);
     }

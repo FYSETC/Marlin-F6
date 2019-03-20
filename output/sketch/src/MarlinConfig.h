@@ -23,7 +23,7 @@
 #ifndef MARLIN_CONFIG_H
 #define MARLIN_CONFIG_H
 
-#define __MARLIN_FIRMWARE__ // fzl:add 20190307
+#define __MARLIN_FIRMWARE__ // geo-f:add 20190307
 
 #include "boards.h"
 #include "macros.h"
