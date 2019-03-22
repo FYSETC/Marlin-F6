@@ -1440,30 +1440,27 @@
 #define DISPLAY_CHARSET_HD44780 JAPANESE
 
 /**
+ * SD CARD
+ *
+ * SD Card support is disabled by default. If your controller has an SD slot,
+ * you must uncomment the following option or it won't work.
+ *
+ */
+#define SDSUPPORT
+
+/**
  * USB and SD CARD SUPPORT
  * 
  * You can only support SDCARD or USB DISK at a time.
  * And you need to our CH376 board to support this feature
  */
-
 //#define FYS_STORAGE_SUPPORT
 #ifdef FYS_STORAGE_SUPPORT    
+  #undef SDSUPPORT
   #define FYS_STORAGE_SPI     // SPI interface
   //#define FYS_STORAGE_UART  // UART interface is NOT GOOD at the moment
   //#define FYS_STORAGE_USBMODE  // default storage is set to USB disk
   #define FYS_STORAGE_SDCARD     // default storage is set to SD card
-#endif
-
-
-  /**
-   * SD CARD
-   *
-   * SD Card support is disabled by default. If your controller has an SD slot,
-   * you must uncomment the following option or it won't work.
-   *
-   */
-#ifndef FYS_STORAGE_SUPPORT
-  #define SDSUPPORT
 #endif
 
 /**

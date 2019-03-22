@@ -82,6 +82,7 @@ class Sd2Card {
   public:
     bool init(const uint8_t sckRateID=0, const pin_t chipSelectPin=SD_CHIP_SELECT_PIN);
 
+    static void resetState(); // geo-f:for sd detect
     static void idle();
 
     inline bool readStart(const uint32_t block)                             { pos = block; return ready(); }

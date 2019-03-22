@@ -146,8 +146,9 @@ static const uint16_t VARADDR_POP_INFOS[INFOS_NUM] = { 0x1180, 0x1190, 0x11A0, 0
 #define     VARADDR_PRINT                           0x1701  
 
 #define     VARVAL_PRINT_FILELIST                   0x0001  
-#define     VARVAL_PRINT_FILELIST_DOWNPAGE          0x0002 
-#define     VARVAL_PRINT_FILELIST_UPPAGE            0x0003 
+#define     VARVAL_PRINT_FILELIST_UPPAGE            0x0002 
+#define     VARVAL_PRINT_FILELIST_DOWNPAGE          0x0003 
+
 static const uint16_t VARVAL_PRINT_FILECHOOSE[] = { 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000A, 0x000B, 0x000C, 0x000D };//选中文件列表上某一个文件
 #define     VARVAL_PRINT_RESUME_PRINT               0x0021  
 #define     VARVAL_PRINT_PAUSE                      0x0022  

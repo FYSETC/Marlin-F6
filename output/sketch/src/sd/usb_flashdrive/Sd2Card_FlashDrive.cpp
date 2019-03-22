@@ -41,20 +41,55 @@ BulkOnly bulk(&usb);
 
 Sd2Card::state_t Sd2Card::state;
 
+// geo-f : when the card removed the idle function below can't get the remove function
+// so we need to reset to USB_HOST_UNINITIALIZED state when it's not PRINTING !!
+void Sd2Card::resetState() {
+  SERIAL_ECHOPGM("Starting USB host...");
+  if (!usb.start()) {
+    SERIAL_ECHOPGM(" Failed. Retrying in 2s.");
+    #if ENABLED(ULTRA_LCD) || ENABLED(EXTENSIBLE_UI)
+      LCD_MESSAGEPGM("USB start failed");
+    #endif
+    state = USB_HOST_DELAY_INIT;
+  }
+  else
+    state = USB_HOST_INITIALIZED;
+  SERIAL_EOL();
+
+  const uint8_t lastUsbTaskState = usb.getUsbTaskState();
+  usb.Task();
+  const uint8_t newUsbTaskState  = usb.getUsbTaskState();
+
+  if (lastUsbTaskState == USB_STATE_RUNNING && newUsbTaskState != USB_STATE_RUNNING) {
+    // the user pulled the flash drive. Make sure the bulk storage driver releases the address
+    #ifdef USB_DEBUG
+      SERIAL_ECHOLNPGM("USB drive removed");
+    #endif
+    //bulk.Release();
+  }
+  if (lastUsbTaskState != USB_STATE_RUNNING && newUsbTaskState == USB_STATE_RUNNING) {
+    #ifdef USB_DEBUG
+      SERIAL_ECHOLNPGM("USB drive inserted");
+    #endif
+  }
+}
+
 // The USB library needs to be called periodically to detect USB thumbdrive
 // insertion and removals. Call this idle() function periodically to allow
 // the USB library to monitor for such events. This function also takes care
 // of initializing the USB library for the first time.
 
 void Sd2Card::idle() {
-  static uint32_t next_retry;
-
+  static uint32_t next_retry;  
+  
   switch (state) {
     case USB_HOST_DELAY_INIT:
+      //SERIAL_ECHOLN("USB_DELAY_INIT");
       next_retry = millis() + 2000;
       state = USB_HOST_WAITING;
       break;
     case USB_HOST_WAITING:
+      //SERIAL_ECHOLN("USB_WAITING");
       if (ELAPSED(millis(), next_retry)) {
         next_retry = millis() + 2000;
         state = USB_HOST_UNINITIALIZED;
@@ -74,6 +109,7 @@ void Sd2Card::idle() {
       SERIAL_EOL();
       break;
     case USB_HOST_INITIALIZED:
+      //SERIAL_ECHOLN("USB_INITIALIZED");
       const uint8_t lastUsbTaskState = usb.getUsbTaskState();
       usb.Task();
       const uint8_t newUsbTaskState  = usb.getUsbTaskState();

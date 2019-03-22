@@ -100,7 +100,8 @@ static FysTLcd myFysTLcd;
 #define MOVE_XYZ_FEEDRATE 50.0
 
 #if (ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)) && PIN_EXISTS(SD_DETECT)
-  bool sd_status;
+  //bool sd_status;
+  uint8_t lcd_sd_status;
 #endif
 
 static int16_t oldFanSpeed = 0;
@@ -140,23 +141,23 @@ static void lcd_check();
 static void dwin_on_cmd(millis_t& tNow);
 static void lcd_init_datas();
 
-void lcd_init()
-{
+void lcd_init() {
   #if defined (SDSUPPORT) && PIN_EXISTS(SD_DETECT)
     pinMode(SD_DETECT_PIN, INPUT);
     WRITE(SD_DETECT_PIN, HIGH);
   #endif
   
-    FysTLcd::ftBegin();
-    
-    lcd_startup_music();
+  FysTLcd::ftBegin();
+  
+  lcd_startup_music();
 
-    lcd_set_page(0);
-    
+  lcd_set_page(0);
+
+  /*
   #if defined (SDSUPPORT) && PIN_EXISTS(SD_DETECT)
-    if (READ(SD_DETECT_PIN) == 0)
+    if (IS_SD_INSERTED)
     {
-        ftState |= FTSTATE_LCD_OLD_CARDSTATUS;
+        //ftState |= FTSTATE_LCD_OLD_CARDSTATUS;
         myFysTLcd.ftCmdStart(VARADDR_STATUS_SD);
         myFysTLcd.ftCmdPut16(1);
         myFysTLcd.ftCmdSend();
@@ -169,16 +170,24 @@ void lcd_init()
     }
     dwinFileWindowTopIndex = 0;
   #endif
-
-    // 
-#if FYSTLCD_PAGE_EXIST(MAIN)
+  */
+    
+  #if FYSTLCD_PAGE_EXIST(MAIN)
     retPageId = FTPAGE(MAIN);
     currentPageId = FTPAGE(MAIN);
-#endif
+  #endif
 
+  /*
   #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
     sd_status = IS_SD_INSERTED;
   #endif // SDSUPPORT && SD_DETECT_PIN
+  */
+
+  #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
+    SET_INPUT_PULLUP(SD_DETECT_PIN);
+    lcd_sd_status = 2; // UNKNOWN
+    dwinFileWindowTopIndex = 0;
+  #endif
 
   lcd_init_datas();// so NO zero data in screen
 }
@@ -266,6 +275,7 @@ void lcd_update()
     }
     #endif
 
+    // deal with startup pages
     lcd_start(t);    
 }
 
@@ -327,10 +337,12 @@ static void lcd_event() {
 }
 
 static void lcd_check() {   
+
   #if defined(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
-    const bool sdNow = IS_SD_INSERTED;
-    if (sdNow != sd_status) {
-        if (!sdNow) {
+    /*
+    const bool sd_statusNow = IS_SD_INSERTED;
+    if (sd_statusNow != sd_status) {
+        if (!sd_statusNow) {
           //ftState |= FTSTATE_LCD_OLD_CARDSTATUS;
           SERIAL_ECHOPGM("SD card inserted.");
           card.initsd();
@@ -342,12 +354,12 @@ static void lcd_check() {
         }
         else {
           bool changePage = false
-              #if FYSTLCD_PAGE_EXIST(FILELIST)
+            #if FYSTLCD_PAGE_EXIST(FILELIST)
               ||currentPageId == PAGENUM_FILELIST
-              #endif
-              #if FYSTLCD_PAGE_EXIST(ACCOMPLISH_PRINT)
+            #endif
+            #if FYSTLCD_PAGE_EXIST(ACCOMPLISH_PRINT)
               ||currentPageId==PAGENUM_ACCOMPLISH_PRINT
-              #endif
+            #endif
               ;
           if (changePage) {
             #if FYSTLCD_PAGE_EXIST(MAIN)
@@ -362,8 +374,58 @@ static void lcd_check() {
           myFysTLcd.ftCmdSend();
         }
         
-        sd_status = sdNow;
+        sd_status = sd_statusNow;
         dwinFileWindowTopIndex = 0;
+    }*/
+
+    const uint8_t sd_status = IS_SD_INSERTED;
+    if (sd_status != lcd_sd_status) {
+
+      uint8_t old_sd_status = lcd_sd_status; // prevent re-entry to this block!
+      lcd_sd_status = sd_status;
+
+      if (sd_status) {
+        safe_delay(500); // Some boards need a delay to get settled
+        card.initsd();
+        if (old_sd_status == 2) {
+          card.beginautostart();  // Initial boot
+        }
+        else {
+          //set_status_P(PSTR(MSG_SD_INSERTED));
+          if(card.cardOK) {
+            myFysTLcd.ftCmdStart(VARADDR_STATUS_SD);
+            myFysTLcd.ftCmdPut16(1);
+            myFysTLcd.ftCmdSend();
+          }
+        }
+      }
+      else {
+        card.release();
+        if (old_sd_status != 2) {
+          //set_status_P(PSTR(MSG_SD_REMOVED));
+          myFysTLcd.ftCmdStart(VARADDR_STATUS_SD);
+          myFysTLcd.ftCmdPut16(0);
+          myFysTLcd.ftCmdSend();
+          //if (!on_status_screen()) return_to_status();
+          bool changePage = false
+            #if FYSTLCD_PAGE_EXIST(FILELIST)
+              ||currentPageId == PAGENUM_FILELIST
+            #endif
+            #if FYSTLCD_PAGE_EXIST(ACCOMPLISH_PRINT)
+              ||currentPageId==PAGENUM_ACCOMPLISH_PRINT
+            #endif
+              ;
+          if (changePage) {
+            #if FYSTLCD_PAGE_EXIST(MAIN)
+              lcd_set_page(FTPAGE(MAIN));
+            #endif
+          }
+        }
+      }
+
+      //refresh();
+      //init_lcd(); // May revive the LCD if static electricity killed it
+      dwinFileWindowTopIndex = 0;
     }
   #endif
 
@@ -1295,272 +1357,326 @@ static void dwin_on_cmd_tool(uint16_t tval) {
 
 static void dwin_on_cmd_print(uint16_t tval)
 {
-#if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
-  if (card.cardOK) {      
-    switch (tval) {
-      case VARVAL_PRINT_FILELIST:
-        if (print_job_timer.isRunning() || print_job_timer.isPaused()) {
+  #if ENABLED(SDSUPPORT) || ENABLED(FYS_STORAGE_SUPPORT)
+    if (card.cardOK) {      
+      switch (tval) {
+        case VARVAL_PRINT_FILELIST:
+          if (print_job_timer.isRunning() || print_job_timer.isPaused()) {
             #if FYSTLCD_PAGE_EXIST(PRINT)
-            lcd_set_page(FTPAGE(PRINT));
+              lcd_set_page(FTPAGE(PRINT));
             #endif                
-        }
-        else {
+          }
+          else {          
+            #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
+              //Sd2Card::resetState();
+              card.initsd();
+              if(!card.cardOK) {
+                SERIAL_ECHOLN("SD card reset state and init fail");
+                #if FYSTLCD_PAGE_EXIST(FILE_INSERT_CARD)
+                  lcd_set_page(FTPAGE(FILE_INSERT_CARD));
+                #endif
+                break;
+              }
+            #endif           
             #if FYSTLCD_PAGE_EXIST(FILELIST)
-            lcd_set_page(FTPAGE(FILELIST));
+              lcd_set_page(FTPAGE(FILELIST));
             #endif
             card.setroot();
             dwinFileWindowTopIndex = card.getnrfilenames();
             //card.getWorkDirName();
             dwin_update_file_list(true);
             //SERIAL_ECHOLNPAIR("root index:", dwinFileWindowTopIndex);
-        }
-        break;
+          }
+          break;
 
-      case VARVAL_PRINT_FILELIST_DOWNPAGE:
-      case VARVAL_PRINT_FILELIST_UPPAGE: {
-        uint8_t realSize=FILE_WINDOW_SIZE;
-        uint16_t fileCnt = card.getnrfilenames();
-        if(card.isIndir()) realSize-=1; 
-        if (tval == VARVAL_PRINT_FILELIST_DOWNPAGE)
-        {                  
-          if (dwinFileWindowTopIndex > realSize)
-          {
-            dwinFileWindowTopIndex -= realSize;
-          }
-          else
-          {
-            dwinFileWindowTopIndex = fileCnt;
-          }
-        }
-        else
-        {
-          if (dwinFileWindowTopIndex+ realSize <= fileCnt)
-          {
-            dwinFileWindowTopIndex += realSize;
-          }
-          else
-          {
-            dwinFileWindowTopIndex = fileCnt%realSize;
-            if(dwinFileWindowTopIndex==0) 
+        case VARVAL_PRINT_FILELIST_DOWNPAGE:
+        case VARVAL_PRINT_FILELIST_UPPAGE: {
+          uint8_t realSize=FILE_WINDOW_SIZE;
+          uint16_t fileCnt = card.getnrfilenames();
+          if(card.isIndir()) realSize-=1; 
+          if (tval == VARVAL_PRINT_FILELIST_DOWNPAGE)
+          {                  
+            if (dwinFileWindowTopIndex > realSize)
             {
-              dwinFileWindowTopIndex = realSize;
+              dwinFileWindowTopIndex -= realSize;
+            }
+            else
+            {
+              dwinFileWindowTopIndex = fileCnt;
             }
           }
-        }
-        dwin_update_file_list(true);      
-      }
-      break;
-      
-      case VARVAL_PRINT_RESUME_PRINT:
-        if (card.isFileOpen()) {
-          if (!card.sdprinting) {                                  
-            lcd_sdcard_resume();
+          else
+          {
+            if (dwinFileWindowTopIndex+ realSize <= fileCnt)
+            {
+              dwinFileWindowTopIndex += realSize;
+            }
+            else
+            {
+              dwinFileWindowTopIndex = fileCnt%realSize;
+              if(dwinFileWindowTopIndex==0) 
+              {
+                dwinFileWindowTopIndex = realSize;
+              }
+            }
           }
+          dwin_update_file_list(true);      
         }
         break;
+        
+        case VARVAL_PRINT_RESUME_PRINT:
+          if (card.isFileOpen()) {
+            if (!card.sdprinting) {                                  
+              lcd_sdcard_resume();
+            }
+          }
+          break;
 
-      case VARVAL_PRINT_PAUSE:
-        if (card.isFileOpen()) {
-          if (card.sdprinting) {                                  
-            lcd_sdcard_pause();
+        case VARVAL_PRINT_PAUSE:
+          if (card.isFileOpen()) {
+            if (card.sdprinting) {                                  
+              lcd_sdcard_pause();
+            }
           }
-        }
-        break;
-          
-      case VARVAL_PRINT_STOP:
-        if (card.isFileOpen()) {                           
+          break;
+            
+        case VARVAL_PRINT_STOP:
+          if (card.isFileOpen()) {                           
+            #if FYSTLCD_PAGE_EXIST(MAIN)
+              lcd_set_page(FTPAGE(MAIN));
+            #endif
+            lcd_sdcard_stop();              
+          }
+          break;
+            
+        case VARVAL_PRINT_TUNE_ENTER:
+          sendParam_Tune();
+          #if FYSTLCD_PAGE_EXIST(PRINT_TUNE)
+            lcd_set_page(FTPAGE(PRINT_TUNE));
+          #endif
+          break;
+            
+        case VARVAL_PRINT_TUNE_APPLY:
+          retPageId = PAGENUM_PRINT;
+          currentPageId = PAGENUM_PRINT;
+          readParam_Tune();
+          #if ENABLED(BABYSTEPPING)
+            settings.save();
+          #endif
+          break;
+
+        case VARVAL_PRINT_TUNE_FAN_ENTER:
+          sendParam_Tune_fan();
+          #if FYSTLCD_PAGE_EXIST(PRINT_TUNE_FAN)
+            lcd_set_page(FTPAGE(PRINT_TUNE_FAN));
+          #endif
+          break;
+            
+        case VARVAL_PRINT_TUNE_FAN_APPLY:
+          retPageId = PAGENUM_PRINT;
+          currentPageId = PAGENUM_PRINT;
+          readParam_Tune_fan();
+          #if ENABLED(BABYSTEPPING)
+            settings.save();
+          #endif
+          break;
+
+        #if ENABLED(POWER_LOSS_RECOVERY)
+          case VARVAL_PRINT_CONTINUE: 
+            lcd_power_loss_recovery_resume();
+            SERIAL_PROTOCOLPGM("Power-loss continue");
+            break;              
+          case VARVAL_PRINT_CANCEL: 
+            SERIAL_PROTOCOLPGM("Power-loss cancel");
+            lcd_power_loss_recovery_cancel();
+            break;
+        #endif
+        
+        #if defined(FILE_PRINT_NEED_CONRIRM)
+          case VARVAL_PRINT_CONFIRM:
+            card.startFileprint();
+            print_job_timer.start();
+            #if FYSTLCD_PAGE_EXIST(PRINT)
+            lcd_set_page(FTPAGE(PRINT));
+            #endif
+            break;
+        #endif
+        
+        case VARVAL_PRINT_SD_REFRESH:
+          card.initsd();
+          if (card.cardOK) {
+            dwinFileWindowTopIndex = card.getnrfilenames();
+            card.getWorkDirName();
+            dwin_update_file_list(true);
+            SERIAL_ECHOLNPGM("Refresh ok.");
+          }
+          else {
+            dwinFileWindowTopIndex = 0;
+            dwin_update_file_list(false);
+          }
+          break;
+            
+        case VARVAL_PRINT_REPRINT:
+          #if ENABLED(FYS_RECORD_CURRENT_PRINT_FILE)
+            if (card.isFileOpen())card.closefile();
+            card.openFile(currentPrintFile, true);
+            if (!card.isFileOpen())
+            {
+                lcd_popup("Target file open fail.");
+                return;
+            }
+            card.startFileprint();
+            print_job_timer.start();
+          #endif
+
+          #if FYSTLCD_PAGE_EXIST(PRINT)
+            lcd_set_page(FTPAGE(PRINT));
+          #endif
+          break;
+
+        case VARVAL_PRINT_FILE_HOME:
+          while(card.isIndir()) card.updir();
           #if FYSTLCD_PAGE_EXIST(MAIN)
             lcd_set_page(FTPAGE(MAIN));
           #endif
-          lcd_sdcard_stop();              
-        }
-        break;
-          
-      case VARVAL_PRINT_TUNE_ENTER:
-        sendParam_Tune();
-        #if FYSTLCD_PAGE_EXIST(PRINT_TUNE)
-          lcd_set_page(FTPAGE(PRINT_TUNE));
-        #endif
-        break;
-          
-      case VARVAL_PRINT_TUNE_APPLY:
-        retPageId = PAGENUM_PRINT;
-        currentPageId = PAGENUM_PRINT;
-        readParam_Tune();
-        #if ENABLED(BABYSTEPPING)
-          settings.save();
-        #endif
-        break;
+          break;
+            
+        default:
+            for (uint8_t i = 0; i < FILE_WINDOW_SIZE; i++) {
+              if (tval == VARVAL_PRINT_FILECHOOSE[i]) {                        
+                if(card.isIndir()) {
+                  if(dwinFileWindowTopIndex+1<=i) break;
+                }
+                else {
+                  if(dwinFileWindowTopIndex<=i) break;
+                }
+                
+              	if (card.isIndir() && 0 == i) { // meaning ".."
+              		card.updir();
+              		dwinFileWindowTopIndex = card.get_num_Files();
+              		dwin_update_file_list(true);       
+              		SERIAL_ECHOLNPAIR("root index:", dwinFileWindowTopIndex);
+              	}
+              	else {
+                  uint8_t realIndex;
+                  if(card.isIndir()) {
+                    realIndex = dwinFileWindowTopIndex - i;
+                  }
+                  else {
+                    realIndex = dwinFileWindowTopIndex - i - 1;
+                  }
+                                    
+              		//if (card.getfilename(realIndex)) // handles empty directory (no action)
+              		//{
+              		  card.getfilename(realIndex);
+              			if (card.filenameIsDir) {
+              				// Build the new directory, and ensure it's terminated with a forward slash
+              				//m_acCurrentDirectory.cat(m_oFileInfo.fileName);
+              				//m_acCurrentDirectory.cat('/');
+              				card.chdir(card.filename);                				
+              				dwinFileWindowTopIndex = card.get_num_Files();
+              				SERIAL_ECHOLNPAIR("isDir index:", dwinFileWindowTopIndex);
+              				dwin_update_file_list(true);
+              			}
+              			else {              			  
+              			  SERIAL_ECHOLNPAIR("file select:", card.filename);
+                      #if defined(FILE_PRINT_NEED_CONRIRM)
+                      
+                        #if FYSTLCD_PAGE_EXIST(PRINTFILE_CONFIRM)
+                         lcd_set_page(FTPAGE(PRINTFILE_CONFIRM));
+                        #endif
+                        
+                      #elif FYSTLCD_PAGE_EXIST(PRINT)
+                        lcd_set_page(FTPAGE(PRINT));
+                      #endif
 
-      case VARVAL_PRINT_TUNE_FAN_ENTER:
-        sendParam_Tune_fan();
-        #if FYSTLCD_PAGE_EXIST(PRINT_TUNE_FAN)
-          lcd_set_page(FTPAGE(PRINT_TUNE_FAN));
-        #endif
-        break;
-          
-      case VARVAL_PRINT_TUNE_FAN_APPLY:
-        retPageId = PAGENUM_PRINT;
-        currentPageId = PAGENUM_PRINT;
-        readParam_Tune_fan();
-        #if ENABLED(BABYSTEPPING)
-          settings.save();
-        #endif
-        break;
+                      dwin_file_select(card.filename,card.longFilename);                                                
+                      break;
+              			}
+              		}
+              	//}                                                       
+              }
+            }
+            break;
+      }
+    }
+    else {
+      #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
+        Sd2Card::resetState();        
+      #endif
+      card.initsd();
+      if(!card.cardOK) {
+        // geo-f : we need to call idle many times to init it , magic!
+        #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
+          for(uint8_t i=0;i<30;i++) {
+            Sd2Card::idle();   
+            safe_delay(10);
+          }
+          card.initsd();
+          if(!card.cardOK) {        
+            #if FYSTLCD_PAGE_EXIST(FILE_INSERT_CARD)
+              lcd_set_page(FTPAGE(FILE_INSERT_CARD));
+            #endif
 
-      #if ENABLED(POWER_LOSS_RECOVERY)
-        case VARVAL_PRINT_CONTINUE: 
-          lcd_power_loss_recovery_resume();
-          SERIAL_PROTOCOLPGM("Power-loss continue");
-          break;              
-        case VARVAL_PRINT_CANCEL: 
-          SERIAL_PROTOCOLPGM("Power-loss cancel");
+            return;
+          }    
+        #else 
+          #if FYSTLCD_PAGE_EXIST(FILE_INSERT_CARD)
+            lcd_set_page(FTPAGE(FILE_INSERT_CARD));
+          #endif
+          return;
+        #endif
+      }
+      
+      switch (tval) {
+        case VARVAL_PRINT_FILELIST:
+          if (print_job_timer.isRunning() || print_job_timer.isPaused()) {
+            #if FYSTLCD_PAGE_EXIST(PRINT)
+              lcd_set_page(FTPAGE(PRINT));
+            #endif                
+          }
+          else {
+            #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
+              Sd2Card::resetState();
+              card.initsd();
+              if(!card.cardOK) {
+                SERIAL_ECHOLN("SD card reset state and init fail");
+                #if FYSTLCD_PAGE_EXIST(FILE_INSERT_CARD)
+                  lcd_set_page(FTPAGE(FILE_INSERT_CARD));
+                #endif
+                break;
+              }
+            #endif
+            #if FYSTLCD_PAGE_EXIST(FILELIST)
+              lcd_set_page(FTPAGE(FILELIST));
+            #endif
+            card.setroot();
+            dwinFileWindowTopIndex = card.getnrfilenames();
+            //card.getWorkDirName();
+            dwin_update_file_list(true);
+            //SERIAL_ECHOLNPAIR("root index:", dwinFileWindowTopIndex);
+          }
+          break;
+        case VARVAL_PRINT_SD_REFRESH:
+          if (card.cardOK) {
+            dwinFileWindowTopIndex = card.getnrfilenames();
+            card.getWorkDirName();
+            dwin_update_file_list(true);
+          }
+          else {
+            dwinFileWindowTopIndex = 0;
+            dwin_update_file_list(false);
+          }
+          break;
+
+        #if ENABLED(POWER_LOSS_RECOVERY)
+        case VARVAL_PRINT_CANCEL:
           lcd_power_loss_recovery_cancel();
           break;
-      #endif
-      
-      #if defined(FILE_PRINT_NEED_CONRIRM)
-        case VARVAL_PRINT_CONFIRM:
-          card.startFileprint();
-          print_job_timer.start();
-          #if FYSTLCD_PAGE_EXIST(PRINT)
-          lcd_set_page(FTPAGE(PRINT));
-          #endif
-          break;
-      #endif
-      
-      case VARVAL_PRINT_SD_REFRESH:
-        card.initsd();
-        if (card.cardOK) {
-          dwinFileWindowTopIndex = card.getnrfilenames();
-          card.getWorkDirName();
-          dwin_update_file_list(true);
-          SERIAL_ECHOLNPGM("Refresh ok.");
-        }
-        else {
-          dwinFileWindowTopIndex = 0;
-          dwin_update_file_list(false);
-        }
-        break;
-          
-      case VARVAL_PRINT_REPRINT:
-        #if ENABLED(FYS_RECORD_CURRENT_PRINT_FILE)
-          if (card.isFileOpen())card.closefile();
-          card.openFile(currentPrintFile, true);
-          if (!card.isFileOpen())
-          {
-              lcd_popup("Target file open fail.");
-              return;
-          }
-          card.startFileprint();
-          print_job_timer.start();
         #endif
-
-        #if FYSTLCD_PAGE_EXIST(PRINT)
-          lcd_set_page(FTPAGE(PRINT));
-        #endif
-        break;
-
-      case VARVAL_PRINT_FILE_HOME:
-        while(card.isIndir()) card.updir();
-        #if FYSTLCD_PAGE_EXIST(MAIN)
-          lcd_set_page(FTPAGE(MAIN));
-        #endif
-        break;
-          
-      default:
-          for (uint8_t i = 0; i < FILE_WINDOW_SIZE; i++) {
-            if (tval == VARVAL_PRINT_FILECHOOSE[i]) {                        
-              if(card.isIndir()) {
-                if(dwinFileWindowTopIndex+1<=i) break;
-              }
-              else {
-                if(dwinFileWindowTopIndex<=i) break;
-              }
-              
-            	if (card.isIndir() && 0 == i) { // meaning ".."
-            		card.updir();
-            		dwinFileWindowTopIndex = card.get_num_Files();
-            		dwin_update_file_list(true);       
-            		SERIAL_ECHOLNPAIR("root index:", dwinFileWindowTopIndex);
-            	}
-            	else {
-                uint8_t realIndex;
-                if(card.isIndir())
-
-                {
-                  realIndex = dwinFileWindowTopIndex - i;
-                }
-                else
-                {
-                  realIndex = dwinFileWindowTopIndex - i - 1;
-                }
-                                  
-            		//if (card.getfilename(realIndex)) // handles empty directory (no action)
-            		//{
-            		  card.getfilename(realIndex);
-            			if (card.filenameIsDir) {
-            				// Build the new directory, and ensure it's terminated with a forward slash
-            				//m_acCurrentDirectory.cat(m_oFileInfo.fileName);
-            				//m_acCurrentDirectory.cat('/');
-            				card.chdir(card.filename);                				
-            				dwinFileWindowTopIndex = card.get_num_Files();
-            				SERIAL_ECHOLNPAIR("isDir index:", dwinFileWindowTopIndex);
-            				dwin_update_file_list(true);
-            			}
-            			else {              			  
-            			  SERIAL_ECHOLNPAIR("file select:", card.filename);
-                    #if defined(FILE_PRINT_NEED_CONRIRM)
-                    
-                      #if FYSTLCD_PAGE_EXIST(PRINTFILE_CONFIRM)
-                       lcd_set_page(FTPAGE(PRINTFILE_CONFIRM));
-                      #endif
-                      
-                    #elif FYSTLCD_PAGE_EXIST(PRINT)
-                      lcd_set_page(FTPAGE(PRINT));
-                    #endif
-
-                    dwin_file_select(card.filename,card.longFilename);                                                
-                    break;
-            			}
-            		}
-            	//}                                                       
-            }
-          }
-          break;
+      }
     }
-  }
-  else {
-    card.initsd();
-    if(!card.cardOK){
-      #if FYSTLCD_PAGE_EXIST(FILE_INSERT_CARD)
-        lcd_set_page(FTPAGE(FILE_INSERT_CARD));
-      #endif
-
-      return;
-    }
-    
-    switch (tval) {
-      case VARVAL_PRINT_SD_REFRESH:
-        if (card.cardOK) {
-          dwinFileWindowTopIndex = card.getnrfilenames();
-          card.getWorkDirName();
-          dwin_update_file_list(true);
-        }
-        else {
-          dwinFileWindowTopIndex = 0;
-          dwin_update_file_list(false);
-        }
-        break;
-
-      #if ENABLED(POWER_LOSS_RECOVERY)
-      case VARVAL_PRINT_CANCEL:
-        lcd_power_loss_recovery_cancel();
-        break;
-      #endif
-    }
-  }
-#endif
+  #endif
 }
 
 static void dwin_on_cmd_setting(uint16_t tval) {
@@ -3088,6 +3204,7 @@ static void readParam_system()
     }
 }
 
+/*
 void kill_screen(const char* msg) 
 {
   char str[INFO_POPUP_LEN + 1], i, j, ch;
@@ -3111,7 +3228,32 @@ void kill_screen(const char* msg)
     lcd_pop_page(FTPAGE(INFO_WAITING));
   #endif           
 }
+*/
 
+void kill_screen(const char* message) 
+{
+  char str[INFO_POPUP_LEN + 1], i, j, ch;
+  char *pMsg = (char *)message;
+  if (pMsg)
+  for (j = 0; j < INFOS_NUM; j++) {
+    memset(str, 0, INFO_POPUP_LEN);
+    i = 0;
+    while (ch = pgm_read_byte(pMsg)) {
+      if (ch == '\n') {
+          pMsg++;
+          break;
+      }
+      str[i++] = ch;
+      pMsg++;
+      if (i >= INFO_POPUP_LEN) break;
+    }
+    FysTLcd::ftPuts(VARADDR_POP_INFOS[j], str, INFO_POPUP_LEN);
+  }
+  
+  #if FYSTLCD_PAGE_EXIST(INFO_WAITING)
+    lcd_pop_page(FTPAGE(INFO_WAITING));
+  #endif           
+}
 
 void dwin_popup(const char* msg, EM_POPUP_PAGE_TYPE pageChoose, char funid)
 {
