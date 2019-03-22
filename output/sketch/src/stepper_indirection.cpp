@@ -793,21 +793,22 @@ void reset_stepper_drivers() {
   #if AXIS_IS_TMC(E0)
     _TMC_INIT(E0, E_AXIS, STEALTH_AXIS_E);
   #endif
+
   #if AXIS_IS_TMC(E1)
-    _TMC_INIT(E1, E_AXIS_N(1), STEALTH_AXIS_E);
+    _TMC_INIT(E1, E_AXIS_N2(1), STEALTH_AXIS_E);
   #endif
   #if AXIS_IS_TMC(E2)
-    _TMC_INIT(E2, E_AXIS_N(2), STEALTH_AXIS_E);
+    _TMC_INIT(E2, E_AXIS_N2(2), STEALTH_AXIS_E);
   #endif
   #if AXIS_IS_TMC(E3)
-    _TMC_INIT(E3, E_AXIS_N(3), STEALTH_AXIS_E);
+    _TMC_INIT(E3, E_AXIS_N2(3), STEALTH_AXIS_E);
   #endif
   #if AXIS_IS_TMC(E4)
-    _TMC_INIT(E4, E_AXIS_N(4), STEALTH_AXIS_E);
+    _TMC_INIT(E4, E_AXIS_N2(4), STEALTH_AXIS_E);
   #endif
   /*
   #if AXIS_IS_TMC(E5)
-    _TMC_INIT(E5, E_AXIS_N(5), STEALTH_AXIS_E);
+    _TMC_INIT(E5, E_AXIS_N2(5), STEALTH_AXIS_E);
   #endif
   */
 

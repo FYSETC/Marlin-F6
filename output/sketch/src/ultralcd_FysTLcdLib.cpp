@@ -2599,11 +2599,10 @@ static void readParam_Motor() {
 }
 
 #if HOTENDS > 1
-static void sendParam_ExtrudersOffset()
-{
-    uint8_t e;
-    myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_OFFSET);
-#if EXTRUDERS==5
+static void sendParam_ExtrudersOffset() {
+  uint8_t e;
+  myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_OFFSET);
+  #if EXTRUDERS==5
     for (e = 1; e < 4; e++)
     {
         for (uint8_t axis = 0; axis < 3; axis++)
@@ -2617,7 +2616,7 @@ static void sendParam_ExtrudersOffset()
         myFysTLcd.ftCmdPutF32(hotend_offset[axis][4]);
     }
     myFysTLcd.ftCmdSend(); 
-#else
+  #else
     for (e = 1; e < EXTRUDERS; e++)
     {
         for (uint8_t axis = 0; axis < 3; axis++)
@@ -2626,12 +2625,12 @@ static void sendParam_ExtrudersOffset()
         }
     }
     myFysTLcd.ftCmdSend();
-#endif
+  #endif
 }
 static void readParam_ExtrudersOffset()
 {
-    myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_OFFSET);
-#if EXTRUDERS==5
+  myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_OFFSET);
+  #if EXTRUDERS==5
     if (myFysTLcd.ftCmdReceive(36))
     {
         for (uint8_t e = 1; e < 4; e++)
@@ -2648,7 +2647,7 @@ static void readParam_ExtrudersOffset()
             myFysTLcd.ftCmdGetF32(hotend_offset[axis][4]);
         }
     }
-#else
+  #else
     if (myFysTLcd.ftCmdReceive((EXTRUDERS - 1) * 12))
     {
         for (uint8_t e = 1; e < EXTRUDERS; e++)
@@ -2657,7 +2656,7 @@ static void readParam_ExtrudersOffset()
             myFysTLcd.ftCmdGetF32(hotend_offset[axis][e]);
         }
     }
-#endif
+  #endif
 }
 static void sendParam_ExtrudersMotor()
 {
@@ -2721,33 +2720,32 @@ static void readParam_ExtrudersMotor()
 #endif
 }
 static void sendParam_ExtrudersTemp() {
-    myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_TEMP);
-#if EXTRUDERS>3
-    for (e = 1; e < 3; e++)
-    {
-        myFysTLcd.ftCmdPutF32(PID_PARAM(Kp, e));
-        myFysTLcd.ftCmdPutF32(unscalePID_i(PID_PARAM(Ki, e)));
-        myFysTLcd.ftCmdPutF32(unscalePID_d(PID_PARAM(Kd, e)));
-    #if ENABLED(PID_EXTRUSION_SCALING)
+  uint8_t e;
+  myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_TEMP);
+  #if EXTRUDERS>3
+    for (e = 1; e < 3; e++) {
+      myFysTLcd.ftCmdPutF32(PID_PARAM(Kp, e));
+      myFysTLcd.ftCmdPutF32(unscalePID_i(PID_PARAM(Ki, e)));
+      myFysTLcd.ftCmdPutF32(unscalePID_d(PID_PARAM(Kd, e)));
+      #if ENABLED(PID_EXTRUSION_SCALING)
         myFysTLcd.ftCmdPutF32(PID_PARAM(Kc, e));
-    #else
+      #else
         myFysTLcd.ftCmdJump(4);
-    #endif
+      #endif
     }
     myFysTLcd.ftCmdSend();
-    for (; e < EXTRUDERS; e++)
-    {
-        myFysTLcd.ftCmdPutF32(PID_PARAM(Kp, e));
-        myFysTLcd.ftCmdPutF32(unscalePID_i(PID_PARAM(Ki, e)));
-        myFysTLcd.ftCmdPutF32(unscalePID_d(PID_PARAM(Kd, e)));
-    #if ENABLED(PID_EXTRUSION_SCALING)
+    for (; e < EXTRUDERS; e++) {
+      myFysTLcd.ftCmdPutF32(PID_PARAM(Kp, e));
+      myFysTLcd.ftCmdPutF32(unscalePID_i(PID_PARAM(Ki, e)));
+      myFysTLcd.ftCmdPutF32(unscalePID_d(PID_PARAM(Kd, e)));
+      #if ENABLED(PID_EXTRUSION_SCALING)
         myFysTLcd.ftCmdPutF32(PID_PARAM(Kc, e));
-    #else
+      #else
         myFysTLcd.ftCmdJump(4);
-    #endif
+      #endif
     }
     myFysTLcd.ftCmdSend();
-#else
+  #else
     for (e = 1; e < EXTRUDERS; e++)
     {
         myFysTLcd.ftCmdPutF32(PID_PARAM(Kp, e));
@@ -2760,63 +2758,63 @@ static void sendParam_ExtrudersTemp() {
         #endif
     }
     myFysTLcd.ftCmdSend();
-#endif
+  #endif
 }
 static void readParam_ExtrudersTemp()
 {
-    uint8_t e;
-    myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_TEMP);
-    #if EXTRUDERS>3
-      if (myFysTLcd.ftCmdReceive(32)) {
-          for (e = 1; e < 3; e++)
-          {
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kp, e));
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Ki, e));
-              PID_PARAM(Ki, e) = scalePID_i(PID_PARAM(Ki, e));
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kd, e));
-              PID_PARAM(Kd, e) = scalePID_d(PID_PARAM(Kd, e));
-          #if ENABLED(PID_EXTRUSION_SCALING)
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kc, e));
-          #else
-              myFysTLcd.ftCmdJump(4);
-          #endif
-          }
-      }
-      myFysTLcd.ftCmdClear();
-      if (myFysTLcd.ftCmdReceive(32))
-      {
-          for (; e < EXTRUDERS; e++)
-          {
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kp, e));
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Ki, e));
-              PID_PARAM(Ki, e) = scalePID_i(PID_PARAM(Ki, e));
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kd, e));
-              PID_PARAM(Kd, e) = scalePID_d(PID_PARAM(Kd, e));
-          #if ENABLED(PID_EXTRUSION_SCALING)
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kc, e));
-          #else
-              myFysTLcd.ftCmdJump(4);
-          #endif
-          }
-      }
-    #else
-      if (myFysTLcd.ftCmdReceive(16*(EXTRUDERS-1)))
-      {
-          for (e = 1; e < EXTRUDERS; e++)
-          {
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kp, e));
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Ki, e));
-              PID_PARAM(Ki, e) = scalePID_i(PID_PARAM(Ki, e));
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kd, e));
-              PID_PARAM(Kd, e) = scalePID_d(PID_PARAM(Kd, e));
-          #if ENABLED(PID_EXTRUSION_SCALING)
-              myFysTLcd.ftCmdGetF32(PID_PARAM(Kc, e));
-          #else
-              myFysTLcd.ftCmdJump(4);
-          #endif
-          }
-      }
-    #endif
+  uint8_t e;
+  myFysTLcd.ftCmdStart(VARADDR_PARAM_EXTRUDERS_TEMP);
+  #if EXTRUDERS>3
+    if (myFysTLcd.ftCmdReceive(32)) {
+        for (e = 1; e < 3; e++)
+        {
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kp, e));
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Ki, e));
+            PID_PARAM(Ki, e) = scalePID_i(PID_PARAM(Ki, e));
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kd, e));
+            PID_PARAM(Kd, e) = scalePID_d(PID_PARAM(Kd, e));
+        #if ENABLED(PID_EXTRUSION_SCALING)
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kc, e));
+        #else
+            myFysTLcd.ftCmdJump(4);
+        #endif
+        }
+    }
+    myFysTLcd.ftCmdClear();
+    if (myFysTLcd.ftCmdReceive(32))
+    {
+        for (; e < EXTRUDERS; e++)
+        {
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kp, e));
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Ki, e));
+            PID_PARAM(Ki, e) = scalePID_i(PID_PARAM(Ki, e));
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kd, e));
+            PID_PARAM(Kd, e) = scalePID_d(PID_PARAM(Kd, e));
+        #if ENABLED(PID_EXTRUSION_SCALING)
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kc, e));
+        #else
+            myFysTLcd.ftCmdJump(4);
+        #endif
+        }
+    }
+  #else
+    if (myFysTLcd.ftCmdReceive(16*(EXTRUDERS-1)))
+    {
+        for (e = 1; e < EXTRUDERS; e++)
+        {
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kp, e));
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Ki, e));
+            PID_PARAM(Ki, e) = scalePID_i(PID_PARAM(Ki, e));
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kd, e));
+            PID_PARAM(Kd, e) = scalePID_d(PID_PARAM(Kd, e));
+        #if ENABLED(PID_EXTRUSION_SCALING)
+            myFysTLcd.ftCmdGetF32(PID_PARAM(Kc, e));
+        #else
+            myFysTLcd.ftCmdJump(4);
+        #endif
+        }
+    }
+  #endif
 }
 #endif
 
