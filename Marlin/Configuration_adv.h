@@ -1305,7 +1305,7 @@
    * Use M915 Snn to specify the current.
    * Use M925 Znn to add extra Z height to Z_MAX_POS.
    */
-  //#define TMC_Z_CALIBRATION
+  #define TMC_Z_CALIBRATION
   #if ENABLED(TMC_Z_CALIBRATION)
     #define CALIBRATION_CURRENT 250
     #define CALIBRATION_EXTRA_HEIGHT 10

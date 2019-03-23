@@ -3245,6 +3245,7 @@ void kill_screen(const char* message)
       pMsg++;
       if (i >= INFO_POPUP_LEN) break;
     }
+    SERIAL_ECHOLN(str);
     FysTLcd::ftPuts(VARADDR_POP_INFOS[j], str, INFO_POPUP_LEN);
   }
   

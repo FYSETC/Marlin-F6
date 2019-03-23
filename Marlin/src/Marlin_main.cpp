@@ -11648,12 +11648,16 @@ inline void gcode_M502() {
       }
 
       #if AXIS_IS_TMC(Z)
-        const uint16_t Z_current_1 = stepperZ.getCurrent();
-        stepperZ.setCurrent(_rms, R_SENSE, HOLD_MULTIPLIER);
+        //const uint16_t Z_current_1 = stepperZ.getCurrent();
+        //stepperZ.setCurrent(_rms, R_SENSE, HOLD_MULTIPLIER); 
+        const uint16_t Z_current_1 = stepperZ.rms_current();
+        stepperZ.rms_current(_rms, HOLD_MULTIPLIER);
       #endif
       #if AXIS_IS_TMC(Z2)
-        const uint16_t Z2_current_1 = stepperZ2.getCurrent();
-        stepperZ2.setCurrent(_rms, R_SENSE, HOLD_MULTIPLIER);
+        //const uint16_t Z2_current_1 = stepperZ2.getCurrent();
+        //stepperZ2.setCurrent(_rms, R_SENSE, HOLD_MULTIPLIER);
+        const uint16_t Z2_current_1 = stepperZ2.rms_current();
+        stepperZ2.rms_current(_rms, HOLD_MULTIPLIER);
       #endif
 
       SERIAL_ECHOPAIR("\nCalibration current: Z", _rms);
@@ -11663,10 +11667,12 @@ inline void gcode_M502() {
       do_blocking_move_to_z(Z_MAX_POS+_z);
 
       #if AXIS_IS_TMC(Z)
-        stepperZ.setCurrent(Z_current_1, R_SENSE, HOLD_MULTIPLIER);
+        //stepperZ.setCurrent(Z_current_1, R_SENSE, HOLD_MULTIPLIER);
+        stepperZ.rms_current(_rms, HOLD_MULTIPLIER);
       #endif
       #if AXIS_IS_TMC(Z2)
-        stepperZ2.setCurrent(Z2_current_1, R_SENSE, HOLD_MULTIPLIER);
+        //stepperZ2.setCurrent(Z2_current_1, R_SENSE, HOLD_MULTIPLIER);
+        stepperZ2.rms_current(_rms, HOLD_MULTIPLIER);
       #endif
 
       do_blocking_move_to_z(Z_MAX_POS);
