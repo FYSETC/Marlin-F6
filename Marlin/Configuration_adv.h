@@ -1117,13 +1117,13 @@
  */
 #if HAS_TRINAMIC
 
-#if HAS_DRIVER(TMC2660)
-  #define R_SENSE           0.052  // R_sense resistor for 2660
-#elif HAS_DRIVER(TMC5160)
-  #define R_SENSE           0.075  // R_sense resistor for 5160
-#else
-  #define R_SENSE           0.11  // R_sense resistor for SilentStepStick2130
-#endif
+  #if HAS_DRIVER(TMC2660)
+    #define R_SENSE           0.052  // R_sense resistor for 2660
+  #elif HAS_DRIVER(TMC5160)
+    #define R_SENSE           0.075  // R_sense resistor for 5160
+  #else
+    #define R_SENSE           0.11  // R_sense resistor for SilentStepStick2130
+  #endif
 
   #define X_R_SENSE         R_SENSE
   #define X2_R_SENSE        R_SENSE
@@ -1175,6 +1175,7 @@
 
   #define E5_CURRENT         800 //geo-f:add
   #define E5_MICROSTEPS       16 //geo-f:add
+  
   /**
    * Use software SPI for TMC2130.
    * The default SW SPI pins are defined the respective pins files,

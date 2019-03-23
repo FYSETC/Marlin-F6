@@ -256,10 +256,12 @@
   #include <HardwareSerial.h>
   #include "planner.h"
 
-  #define _TMC2208_DEFINE_HARDWARE(ST, L) TMCMarlin<TMC2208Stepper, L> stepper##ST(&ST##_HARDWARE_SERIAL, R_SENSE)
+  //#define _TMC2208_DEFINE_HARDWARE(ST, L) TMCMarlin<TMC2208Stepper, L> stepper##ST(&ST##_HARDWARE_SERIAL, R_SENSE)
+  #define _TMC2208_DEFINE_HARDWARE(ST, L) TMCMarlin<TMC2208Stepper, L> stepper##ST(&ST##_HARDWARE_SERIAL, ST##_R_SENSE)
   #define TMC2208_DEFINE_HARDWARE(ST) _TMC2208_DEFINE_HARDWARE(ST, TMC_##ST##_LABEL)
 
-  #define _TMC2208_DEFINE_SOFTWARE(ST, L) TMCMarlin<TMC2208Stepper, L> stepper##ST(ST##_SERIAL_RX_PIN, ST##_SERIAL_TX_PIN, R_SENSE, ST##_SERIAL_RX_PIN > -1)
+  //#define _TMC2208_DEFINE_SOFTWARE(ST, L) TMCMarlin<TMC2208Stepper, L> stepper##ST(ST##_SERIAL_RX_PIN, ST##_SERIAL_TX_PIN, R_SENSE, ST##_SERIAL_RX_PIN > -1)
+  #define _TMC2208_DEFINE_SOFTWARE(ST, L) TMCMarlin<TMC2208Stepper, L> stepper##ST(ST##_SERIAL_RX_PIN, ST##_SERIAL_TX_PIN, ST##_R_SENSE, ST##_SERIAL_RX_PIN > -1)
   #define TMC2208_DEFINE_SOFTWARE(ST) _TMC2208_DEFINE_SOFTWARE(ST, TMC_##ST##_LABEL)
 
   // Stepper objects of TMC2208 steppers used
@@ -510,10 +512,12 @@
   #include "enum.h"
 
   #if ENABLED(TMC_USE_SW_SPI)
-    #define _TMC2660_DEFINE(ST, L) TMCMarlin<TMC2660Stepper, L> stepper##ST(ST##_CS_PIN, R_SENSE, TMC_SW_MOSI, TMC_SW_MISO, TMC_SW_SCK)
+    //#define _TMC2660_DEFINE(ST, L) TMCMarlin<TMC2660Stepper, L> stepper##ST(ST##_CS_PIN, R_SENSE, TMC_SW_MOSI, TMC_SW_MISO, TMC_SW_SCK)
+    #define _TMC2660_DEFINE(ST, L) TMCMarlin<TMC2660Stepper, L> stepper##ST(ST##_CS_PIN, ST##_R_SENSE, TMC_SW_MOSI, TMC_SW_MISO, TMC_SW_SCK)
     #define TMC2660_DEFINE(ST) _TMC2660_DEFINE(ST, TMC_##ST##_LABEL)
   #else
-    #define _TMC2660_DEFINE(ST, L) TMCMarlin<TMC2660Stepper, L> stepper##ST(ST##_CS_PIN, R_SENSE)
+    //#define _TMC2660_DEFINE(ST, L) TMCMarlin<TMC2660Stepper, L> stepper##ST(ST##_CS_PIN, R_SENSE)
+    #define _TMC2660_DEFINE(ST, L) TMCMarlin<TMC2660Stepper, L> stepper##ST(ST##_CS_PIN, ST##_R_SENSE)
     #define TMC2660_DEFINE(ST) _TMC2660_DEFINE(ST, TMC_##ST##_LABEL)
   #endif
 
@@ -817,7 +821,7 @@ void reset_stepper_drivers() {
       #if AXIS_HAS_STALLGUARD(X)
         stepperX.sgt(X_STALL_SENSITIVITY);
         // geo-f : add for TMC2660 driver 20190111
-        #if HAS_DRIVER(TMC2660)      
+        #if AXIS_DRIVER_TYPE_X(TMC2660)      
           stepperX.stall_current_var(X_CURRENT);
           stepperX.stall_current_homing_var(X_STALL_CURRENT);
           stepperX.stall_sentility_var(X_STALL_SENSITIVITY);
@@ -832,12 +836,12 @@ void reset_stepper_drivers() {
       #if AXIS_HAS_STALLGUARD(Y)
         stepperY.sgt(Y_STALL_SENSITIVITY);
         // geo-f : add for TMC2660 driver 20190111
-        #if HAS_DRIVER(TMC2660)
-        stepperY.stall_current_var(Y_CURRENT);
-        stepperY.stall_current_homing_var(Y_STALL_CURRENT);
-        stepperY.stall_sentility_var(Y_STALL_SENSITIVITY);
-        stepperY.stall_sentility_homing_var(Y_STALL_SENSITIVITY_HOMING);
-        #endif
+        #if AXIS_DRIVER_TYPE_Y(TMC2660)
+          stepperY.stall_current_var(Y_CURRENT);
+          stepperY.stall_current_homing_var(Y_STALL_CURRENT);
+          stepperY.stall_sentility_var(Y_STALL_SENSITIVITY);
+          stepperY.stall_sentility_homing_var(Y_STALL_SENSITIVITY_HOMING);
+          #endif
       #endif
       #if AXIS_HAS_STALLGUARD(Y2)
         stepperY2.sgt(Y_STALL_SENSITIVITY);
@@ -847,7 +851,7 @@ void reset_stepper_drivers() {
       #if AXIS_HAS_STALLGUARD(Z)
         stepperZ.sgt(Z_STALL_SENSITIVITY);
         // geo-f : add for TMC2660 driver 20190111
-        #if HAS_DRIVER(TMC2660)
+        #if AXIS_DRIVER_TYPE_Z(TMC2660)
           stepperZ.stall_current_var(Z_CURRENT);
           stepperZ.stall_current_homing_var(Z_STALL_CURRENT);
           stepperZ.stall_sentility_var(Z_STALL_SENSITIVITY);
