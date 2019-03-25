@@ -2435,6 +2435,7 @@ static void readParam_Tune()
       myFysTLcd.ftCmdGetI16(feedrate_percentage);
       for (e = 0; e < EXTRUDERS; e++) {         
 		    myFysTLcd.ftCmdGetI16(planner.flow_percentage[e]);
+		    planner.refresh_e_factor(e);
       }
       for (; e<5; e++)myFysTLcd.ftCmdJump(2);		
     }
