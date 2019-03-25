@@ -3793,10 +3793,14 @@ inline void gcode_G4() {
                 fr_mm_s = MIN(homing_feedrate(X_AXIS), homing_feedrate(Y_AXIS)) * SQRT(sq(mlratio) + 1.0);
 
     #if ENABLED(SENSORLESS_HOMING)
-      sensorless_t stealth_states { false, false, false };
+      sensorless_t stealth_states { false, false, false};
+      #if AXIS_HAS_STALLGUARD(X)
       stealth_states.x = tmc_enable_stallguard(stepperX);
+      #endif
+      #if AXIS_HAS_STALLGUARD(Y)
       stealth_states.y = tmc_enable_stallguard(stepperY);
-	#endif
+      #endif      
+	  #endif
 
     do_blocking_move_to_xy(1.5 * mlx * x_axis_home_dir, 1.5 * mly * home_dir(Y_AXIS), fr_mm_s);
 
@@ -3805,8 +3809,12 @@ inline void gcode_G4() {
     current_position[X_AXIS] = current_position[Y_AXIS] = 0.0;
 
     #if ENABLED(SENSORLESS_HOMING)
-  	  tmc_disable_stallguard(stepperX, stealth_states.x);
-      tmc_disable_stallguard(stepperY, stealth_states.y);
+      #if AXIS_HAS_STALLGUARD(X)
+        tmc_disable_stallguard(stepperX, stealth_states.x);
+      #endif
+      #if AXIS_HAS_STALLGUARD(Y)
+        tmc_disable_stallguard(stepperY, stealth_states.y);
+      #endif
     #endif
   }
 

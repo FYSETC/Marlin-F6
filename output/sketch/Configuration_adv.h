@@ -383,7 +383,7 @@
 #define Y_HOME_BUMP_MM 10
 #define Z_HOME_BUMP_MM 2
 #define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
-//#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
+#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 
 // When G28 is called, this option will make Y home before X
 //#define HOME_Y_BEFORE_X
@@ -1305,7 +1305,7 @@
    * Use M915 Snn to specify the current.
    * Use M925 Znn to add extra Z height to Z_MAX_POS.
    */
-  #define TMC_Z_CALIBRATION
+  //#define TMC_Z_CALIBRATION
   #if ENABLED(TMC_Z_CALIBRATION)
     #define CALIBRATION_CURRENT 250
     #define CALIBRATION_EXTRA_HEIGHT 10
