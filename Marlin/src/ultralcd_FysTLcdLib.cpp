@@ -1229,10 +1229,12 @@ static void dwin_on_cmd_tool(uint16_t tval) {
       myFysTLcd.ftCmdSend();
       break;
     case VARVAL_TOOL_COOLDOWN_BED:
-      thermalManager.setTargetBed(0);
-      myFysTLcd.ftCmdStart(VARADDR_TUNE_PREHEAT_BED_TEMP);
-      myFysTLcd.ftCmdJump(2);
-      myFysTLcd.ftCmdSend();
+      #if HAS_HEATED_BED
+        thermalManager.setTargetBed(0);
+        myFysTLcd.ftCmdStart(VARADDR_TUNE_PREHEAT_BED_TEMP);
+        myFysTLcd.ftCmdJump(2);
+        myFysTLcd.ftCmdSend();
+      #endif
       break;
     case VARVAL_TOOL_EMERGENCY_STOP_MOTOR: 
       #if ENABLED(FYS_POWERBREAK_STEPPER_STATUS)
@@ -2026,7 +2028,9 @@ static void dwin_on_cmd(millis_t& tNow) {
     thermalManager.setTargetHotend(tval, 0);
     break;
   case VARADDR_TUNE_PREHEAT_BED_TEMP:
-    thermalManager.setTargetBed(tval);
+    #if HAS_HEATED_BED
+      thermalManager.setTargetBed(tval);
+    #endif
     break;
   case VARADDR_TUNE_PREHEAT_HOTEND2_SELECT:      
     #if EXTRUDERS>1
