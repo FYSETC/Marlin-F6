@@ -308,6 +308,7 @@ static void lcd_event() {
     
     case LCDEVT_AUTOPID_STOP:
       ftState &= ~FTSTATE_AUTOPID_ING;
+      
     case LCDEVT_DETAIL_EXTRUDER:
       ftState |= FTSTATE_UPDATE_NOW;
       sendActiveExtrudersParam();
@@ -710,12 +711,7 @@ static void dwin_update_file_list(bool valid) {
             }
 
             //SERIAL_PROTOCOLLN(card.longFilename);
-            //SERIAL_PROTOCOLLN(sdFileName);
-            
-            //char*t = strchr(sdFileName, '.');
-            //while(*t) *t++ = '\0';
-
-            //SERIAL_ECHOLN("UUU");
+            //SERIAL_PROTOCOLLN(sdFileName);            
           }
         }
         
@@ -1352,6 +1348,7 @@ static void dwin_on_cmd_tool(uint16_t tval) {
   void lcd_sdcard_stop() {
     wait_for_heatup = wait_for_user = false;
     abort_sd_printing = true;
+    SERIAL_ECHOLNPGM("stop!");
     //lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
     //lcd_return_to_status();
   }
@@ -1815,12 +1812,12 @@ static void dwin_on_cmd(millis_t& tNow) {
 
   uint16_t tval = FysTLcd::ftCmdVal16();
   // geo-f 
-  /*
+  
   SERIAL_ECHOPGM(" Addr:");
   reportCmdContent(FysTLcd::ftAddr);
   SERIAL_ECHOPGM(" Val:");
   reportCmdContent(tval);
-  */
+  
   uint8_t cmd[2];
   switch (FysTLcd::ftAddr) {
   case VARADDR_TOOL:

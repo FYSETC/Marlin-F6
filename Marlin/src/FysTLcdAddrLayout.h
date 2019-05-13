@@ -2,7 +2,7 @@
 
 
 //*************** 1010---1060: file list ****************/
-static const uint16_t VARADDR_FILES_NAME[] = { 0x1010, 0x1018, 0x1020, 0x1028, 0x1030 };
+static const uint16_t VARADDR_FILES_NAME[] = { 0x1010, 0x1020, 0x1030, 0x1040, 0x1050 };
 static const uint8_t FILE_WINDOW_SIZE = sizeof(VARADDR_FILES_NAME) / sizeof(VARADDR_FILES_NAME[0]);
 
 /************* 0x1070---0x109F status data ***************/
@@ -248,9 +248,9 @@ static const uint16_t VARVAL_PRINT_FILECHOOSE[] = { 0x0004, 0x0005, 0x0006, 0x00
 #define     VARADDR_WIFI_DEV_MAC                    0x1760  
 
 #define     VARADDR_VERSION_DATE                    0x1762  
-#define     VARADDR_SERIAL_NUMBER                   0x1766  
-#define     VARADDR_INFO_PRINT                      0x1770 
-#define     VARADDR_INFO_PRINT_ACC_TIME             0x1771 
+#define     VARADDR_SERIAL_NUMBER                   0x176A  
+#define     VARADDR_INFO_PRINT                      0x1780 
+#define     VARADDR_INFO_PRINT_ACC_TIME             0x1788 
 
 #define     ATTACH_STR_LEN                          0x14    
 #define     SERIAL_NUMBER                           "010-2323-4545"

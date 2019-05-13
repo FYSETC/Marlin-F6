@@ -343,11 +343,21 @@
       ftWrite(FYSTLCD_FRAM_HEAD2);
       ftWrite(len + 3);
       ftWrite(FYSTLCD_WRITE_VAR);
+      //SERIAL_ECHO("varAddr:"); // geo-f:test
+      //SERIAL_PRINT((uint8_t)(varAddr >> 8),16); // geo-f:test
+      //SERIAL_PRINTLN((uint8_t)varAddr,16); // geo-f:test
       ftWrite((uint8_t)(varAddr >> 8));
       ftWrite((uint8_t)varAddr);
       while (len-- > 0) {
-        if(*str)ftWrite(*str++);
-        else ftWrite(0);
+        if(*str) {
+          //SERIAL_ECHO(*str); // geo-f:test
+          ftWrite(*str++);
+          
+        }
+        else {
+          //SERIAL_ECHO("x");
+          ftWrite(0);
+        }
       }
     #endif
   }

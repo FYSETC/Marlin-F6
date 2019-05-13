@@ -308,6 +308,7 @@ static void lcd_event() {
     
     case LCDEVT_AUTOPID_STOP:
       ftState &= ~FTSTATE_AUTOPID_ING;
+      
     case LCDEVT_DETAIL_EXTRUDER:
       ftState |= FTSTATE_UPDATE_NOW;
       sendActiveExtrudersParam();
@@ -710,12 +711,7 @@ static void dwin_update_file_list(bool valid) {
             }
 
             //SERIAL_PROTOCOLLN(card.longFilename);
-            //SERIAL_PROTOCOLLN(sdFileName);
-            
-            //char*t = strchr(sdFileName, '.');
-            //while(*t) *t++ = '\0';
-
-            //SERIAL_ECHOLN("UUU");
+            //SERIAL_PROTOCOLLN(sdFileName);            
           }
         }
         
@@ -1108,7 +1104,9 @@ static void dwin_on_cmd_tool(uint16_t tval) {
       break;
       
     case VARVAL_TOOL_AUTO_LEVELING:
-      zprobe_zoffset -=0.3;
+      //#if HAS_BED_PROBE
+      //  zprobe_zoffset -=0.3;
+      //#endif
       dwin_popup(PSTR("\n    Leveling is in progress."),EPPT_INFO_WAITING); // geo-f : comment 20180608
       enqueue_and_echo_commands_P(PSTR("G28"));
       enqueue_and_echo_commands_P(PSTR("G29"));
@@ -1229,10 +1227,12 @@ static void dwin_on_cmd_tool(uint16_t tval) {
       myFysTLcd.ftCmdSend();
       break;
     case VARVAL_TOOL_COOLDOWN_BED:
-      thermalManager.setTargetBed(0);
-      myFysTLcd.ftCmdStart(VARADDR_TUNE_PREHEAT_BED_TEMP);
-      myFysTLcd.ftCmdJump(2);
-      myFysTLcd.ftCmdSend();
+      #if HAS_HEATED_BED
+        thermalManager.setTargetBed(0);
+        myFysTLcd.ftCmdStart(VARADDR_TUNE_PREHEAT_BED_TEMP);
+        myFysTLcd.ftCmdJump(2);
+        myFysTLcd.ftCmdSend();
+      #endif
       break;
     case VARVAL_TOOL_EMERGENCY_STOP_MOTOR: 
       #if ENABLED(FYS_POWERBREAK_STEPPER_STATUS)
@@ -1348,6 +1348,7 @@ static void dwin_on_cmd_tool(uint16_t tval) {
   void lcd_sdcard_stop() {
     wait_for_heatup = wait_for_user = false;
     abort_sd_printing = true;
+    SERIAL_ECHOLNPGM("stop!");
     //lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
     //lcd_return_to_status();
   }
@@ -1811,12 +1812,12 @@ static void dwin_on_cmd(millis_t& tNow) {
 
   uint16_t tval = FysTLcd::ftCmdVal16();
   // geo-f 
-  /*
+  
   SERIAL_ECHOPGM(" Addr:");
   reportCmdContent(FysTLcd::ftAddr);
   SERIAL_ECHOPGM(" Val:");
   reportCmdContent(tval);
-  */
+  
   uint8_t cmd[2];
   switch (FysTLcd::ftAddr) {
   case VARADDR_TOOL:
@@ -2026,7 +2027,9 @@ static void dwin_on_cmd(millis_t& tNow) {
     thermalManager.setTargetHotend(tval, 0);
     break;
   case VARADDR_TUNE_PREHEAT_BED_TEMP:
-    thermalManager.setTargetBed(tval);
+    #if HAS_HEATED_BED
+      thermalManager.setTargetBed(tval);
+    #endif
     break;
   case VARADDR_TUNE_PREHEAT_HOTEND2_SELECT:      
     #if EXTRUDERS>1
@@ -2435,6 +2438,7 @@ static void readParam_Tune()
       myFysTLcd.ftCmdGetI16(feedrate_percentage);
       for (e = 0; e < EXTRUDERS; e++) {         
 		    myFysTLcd.ftCmdGetI16(planner.flow_percentage[e]);
+		    planner.refresh_e_factor(e);
       }
       for (; e<5; e++)myFysTLcd.ftCmdJump(2);		
     }

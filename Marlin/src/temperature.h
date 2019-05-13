@@ -424,7 +424,7 @@ class Temperature {
       #endif
 
       #if ENABLED(FYSTLCD_V1)
-        myLcdEvt |= ((uint16_t)0x0001 << LCDEVT_DETAIL_EXTRUDER);//YSZ-WORK 
+        myLcdEvt |= ((uint16_t)0x0001 << LCDEVT_DETAIL_EXTRUDER);//geo-f 
 	    #endif
     }
 
@@ -465,6 +465,10 @@ class Temperature {
         #if WATCH_THE_BED
           start_watching_bed();
         #endif
+
+        #if ENABLED(FYSTLCD_V1)
+          myLcdEvt |= ((uint16_t)0x0001 << LCDEVT_DETAIL_EXTRUDER);
+	      #endif
       }
 
       #if WATCH_THE_BED

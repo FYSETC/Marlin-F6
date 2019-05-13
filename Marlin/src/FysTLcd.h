@@ -54,7 +54,7 @@
     
     #define FYSTLCD_SER_BAUD                115200
     #define FYSTLCD_SER_PORT                2
-    #define FYSTLCD_FILENAME_LEN            25      // filename length
+    #define FYSTLCD_FILENAME_LEN            32      // filename length
     #define FYSTLCD_IMAGE_SIZE              250 
     #define FYSTLCD_DOT_TEN_MUL             10.0    // 1 decimal
     #define FYSTLCD_DOT_HUND_MUL            100.0   // 2 decimal
