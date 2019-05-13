@@ -711,7 +711,7 @@ static void dwin_update_file_list(bool valid) {
             }
 
             //SERIAL_PROTOCOLLN(card.longFilename);
-            //SERIAL_PROTOCOLLN(sdFileName);            
+            SERIAL_PROTOCOLLN(sdFileName);            
           }
         }
         
@@ -1362,9 +1362,15 @@ static void dwin_on_cmd_print(uint16_t tval)
     if (card.cardOK) {      
       switch (tval) {
         case VARVAL_PRINT_FILELIST:
+          if(abort_sd_printing) {
+            SERIAL_ECHOLNPGM("sss!");
+            return;
+          }
+        
           if (print_job_timer.isRunning() || print_job_timer.isPaused()) {
             #if FYSTLCD_PAGE_EXIST(PRINT)
               lcd_set_page(FTPAGE(PRINT));
+              SERIAL_ECHOLNPGM("bbb!");
             #endif                
           }
           else {          
@@ -1386,6 +1392,7 @@ static void dwin_on_cmd_print(uint16_t tval)
             dwinFileWindowTopIndex = card.getnrfilenames();
             //card.getWorkDirName();
             dwin_update_file_list(true);
+
             //SERIAL_ECHOLNPAIR("root index:", dwinFileWindowTopIndex);
           }
           break;

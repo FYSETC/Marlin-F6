@@ -212,6 +212,7 @@ bool PrintCounter::start() {
 bool PrintCounter::stop() {
   #if ENABLED(DEBUG_PRINTCOUNTER)
     debug(PSTR("stop"));
+    SERIAL_ECHOLNPGM("stopxxx");
   #endif
 
   if (super::stop()) {
@@ -230,7 +231,7 @@ bool PrintCounter::stop() {
 // @Override
 void PrintCounter::reset() {
   #if ENABLED(DEBUG_PRINTCOUNTER)
-    debug(PSTR("stop"));
+    debug(PSTR("stop"));    
   #endif
 
   super::reset();

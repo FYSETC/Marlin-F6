@@ -627,7 +627,10 @@ class Planner {
       if (cleaning_buffer_counter) {
         --cleaning_buffer_counter;
         #if ENABLED(SD_FINISHED_STEPPERRELEASE) && defined(SD_FINISHED_RELEASECOMMAND)
-          if (!cleaning_buffer_counter) enqueue_and_echo_commands_P(PSTR(SD_FINISHED_RELEASECOMMAND));
+          if (!cleaning_buffer_counter) {
+            enqueue_and_echo_commands_P(PSTR(SD_FINISHED_RELEASECOMMAND));
+            SERIAL_ECHOLNPGM("S7");
+          }
         #endif
       }
     }

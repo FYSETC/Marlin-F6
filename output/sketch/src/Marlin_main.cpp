@@ -379,7 +379,7 @@
 
 bool Running = true;
 
-uint8_t marlin_debug_flags = DEBUG_NONE;
+uint8_t marlin_debug_flags = DEBUG_INFO;//DEBUG_NONE
 
 /**
  * Cartesian Current Position
@@ -15005,17 +15005,21 @@ void loop() {
     card.checkautostart();
 
     #if ENABLED(ULTIPANEL)||ENABLED(FYSTLCD_V1)
-      if (abort_sd_printing) {
-        abort_sd_printing = false;
+      if (abort_sd_printing) {        
         card.stopSDPrint(
           #if SD_RESORT
             true
           #endif
         );
+        SERIAL_ECHOLNPGM("S1");
         clear_command_queue();
+        SERIAL_ECHOLNPGM("S2");
         quickstop_stepper();
+        SERIAL_ECHOLNPGM("S3");
         print_job_timer.stop();
+        SERIAL_ECHOLNPGM("S4");
         thermalManager.disable_all_heaters();
+        SERIAL_ECHOLNPGM("S5");
         #if FAN_COUNT > 0
           for (uint8_t i = 0; i < FAN_COUNT; i++) fanSpeeds[i] = 0;
         #endif
@@ -15023,6 +15027,9 @@ void loop() {
         #if ENABLED(POWER_LOSS_RECOVERY)
           card.removeJobRecoveryFile();
         #endif
+
+        SERIAL_ECHOLNPGM("S6");
+        abort_sd_printing = false;
       }
     #endif
 

@@ -24,7 +24,7 @@
 #define PRINTCOUNTER_H
 
 // Print debug messages with M111 S2
-//#define DEBUG_PRINTCOUNTER
+#define DEBUG_PRINTCOUNTER
 
 #include "macros.h"
 #include "language.h"
