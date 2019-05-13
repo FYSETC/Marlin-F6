@@ -15006,7 +15006,7 @@ void loop() {
 
     #if ENABLED(ULTIPANEL)||ENABLED(FYSTLCD_V1)
       if (abort_sd_printing) {
-        abort_sd_printing = false;
+
         card.stopSDPrint(
           #if SD_RESORT
             true
@@ -15023,6 +15023,8 @@ void loop() {
         #if ENABLED(POWER_LOSS_RECOVERY)
           card.removeJobRecoveryFile();
         #endif
+
+        abort_sd_printing = false;
       }
     #endif
 
