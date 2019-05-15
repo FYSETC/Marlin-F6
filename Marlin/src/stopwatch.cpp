@@ -37,7 +37,6 @@ bool Stopwatch::stop() {
   if (isRunning() || isPaused()) {
     state = STOPPED;
     stopTimestamp = millis();
-    SERIAL_ECHOLNPGM("stopbbb");
     return true;
   }
   else return false;
