@@ -15005,7 +15005,12 @@ void loop() {
     card.checkautostart();
 
     #if ENABLED(ULTIPANEL)||ENABLED(FYSTLCD_V1)
+<<<<<<< HEAD
       if (abort_sd_printing) {        
+=======
+      if (abort_sd_printing) {
+
+>>>>>>> master
         card.stopSDPrint(
           #if SD_RESORT
             true
@@ -15028,7 +15033,10 @@ void loop() {
           card.removeJobRecoveryFile();
         #endif
 
+<<<<<<< HEAD
         SERIAL_ECHOLNPGM("S6");
+=======
+>>>>>>> master
         abort_sd_printing = false;
       }
     #endif

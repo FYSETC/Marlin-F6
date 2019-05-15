@@ -1362,11 +1362,16 @@ static void dwin_on_cmd_print(uint16_t tval)
     if (card.cardOK) {      
       switch (tval) {
         case VARVAL_PRINT_FILELIST:
+<<<<<<< HEAD
           if(abort_sd_printing) {
             SERIAL_ECHOLNPGM("sss!");
             return;
           }
         
+=======
+          if(abort_sd_printing) return ;
+          
+>>>>>>> master
           if (print_job_timer.isRunning() || print_job_timer.isPaused()) {
             #if FYSTLCD_PAGE_EXIST(PRINT)
               lcd_set_page(FTPAGE(PRINT));
