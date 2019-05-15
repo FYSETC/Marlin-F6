@@ -212,7 +212,6 @@ bool PrintCounter::start() {
 bool PrintCounter::stop() {
   #if ENABLED(DEBUG_PRINTCOUNTER)
     debug(PSTR("stop"));
-    SERIAL_ECHOLNPGM("stopxxx");
   #endif
 
   if (super::stop()) {

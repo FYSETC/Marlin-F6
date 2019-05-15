@@ -24,7 +24,7 @@
 #define STOPWATCH_H
 
 // Print debug messages with M111 S2 (Uses 156 bytes of PROGMEM)
-#define DEBUG_STOPWATCH
+//#define DEBUG_STOPWATCH
 
 #include "macros.h"
 #include "types.h"

@@ -24,6 +24,8 @@
   #include "duration_t.h"
 #endif
 
+static uint8_t dynamicIcon = 0;
+
 typedef void(*generalVoidFun)();
 
 static uint8_t ftState = 0x00;
@@ -1348,7 +1350,7 @@ static void dwin_on_cmd_tool(uint16_t tval) {
   void lcd_sdcard_stop() {
     wait_for_heatup = wait_for_user = false;
     abort_sd_printing = true;
-    SERIAL_ECHOLNPGM("stop!");
+    //SERIAL_ECHOLNPGM("stop!");
     //lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
     //lcd_return_to_status();
   }
@@ -1362,20 +1364,11 @@ static void dwin_on_cmd_print(uint16_t tval)
     if (card.cardOK) {      
       switch (tval) {
         case VARVAL_PRINT_FILELIST:
-<<<<<<< HEAD
-          if(abort_sd_printing) {
-            SERIAL_ECHOLNPGM("sss!");
-            return;
-          }
-        
-=======
           if(abort_sd_printing) return ;
-          
->>>>>>> master
+
           if (print_job_timer.isRunning() || print_job_timer.isPaused()) {
             #if FYSTLCD_PAGE_EXIST(PRINT)
-              lcd_set_page(FTPAGE(PRINT));
-              SERIAL_ECHOLNPGM("bbb!");
+              lcd_set_page(FTPAGE(PRINT));             
             #endif                
           }
           else {          
@@ -1459,6 +1452,7 @@ static void dwin_on_cmd_print(uint16_t tval)
               lcd_set_page(FTPAGE(MAIN));
             #endif
             lcd_sdcard_stop();              
+            dynamicIcon = 0;
           }
           break;
             
@@ -1509,6 +1503,7 @@ static void dwin_on_cmd_print(uint16_t tval)
           case VARVAL_PRINT_CONFIRM:
             card.startFileprint();
             print_job_timer.start();
+            dynamicIcon = 0;
             #if FYSTLCD_PAGE_EXIST(PRINT)
             lcd_set_page(FTPAGE(PRINT));
             #endif
@@ -1823,12 +1818,14 @@ static void dwin_on_cmd(millis_t& tNow) {
 	#endif
 
   uint16_t tval = FysTLcd::ftCmdVal16();
+
   // geo-f 
-  
+  /*
   SERIAL_ECHOPGM(" Addr:");
   reportCmdContent(FysTLcd::ftAddr);
   SERIAL_ECHOPGM(" Val:");
   reportCmdContent(tval);
+  */
   
   uint8_t cmd[2];
   switch (FysTLcd::ftAddr) {
@@ -2131,8 +2128,7 @@ static void lcd_period_prompt_report() {
   #endif
 
   myFysTLcd.ftCmdJump(2);//10A6 reserved
-
-  static uint8_t dynamicIcon = 0;
+  
   dynamicIcon++;
   if (dynamicIcon > 9)dynamicIcon = 0;
   
@@ -2150,6 +2146,7 @@ static void lcd_period_prompt_report() {
       myFysTLcd.ftCmdPut16(dynamicIcon);
     else
   #endif
+  
   myFysTLcd.ftCmdJump(2);
   
   myFysTLcd.ftCmdJump(2);//10A9 reserved
