@@ -24,45 +24,30 @@
 
 #include "MarlinConfig.h"
 
-/* geo-f
-#define A4988               0x001
-#define DRV8825             0x002
-#define LV8729              0x003
-#define L6470               0x104
-#define TB6560              0x005
-#define TB6600              0x006
-#define TMC2100             0x007
-#define TMC2130             0x108
-#define TMC2130_STANDALONE  0x008
-#define TMC2208             0x109
-#define TMC2208_STANDALONE  0x009
-#define TMC26X              0x10A
-#define TMC26X_STANDALONE   0x00A
-#define TMC2660             0x10B
-#define TMC2660_STANDALONE  0x00B
-*/
+#define _A4988               0x001
+#define _A5984               0x002
+#define _DRV8825             0x003
+#define _LV8729              0x004
+#define _L6470               0x105
+#define _TB6560              0x006
+#define _TB6600              0x007
+#define _TMC2100             0x008
+#define _TMC2130             2130
+#define _TMC2130_STANDALONE  0x009
+#define _TMC2208             2208
+#define _TMC2208_STANDALONE  0x00A
+#define _TMC2209             2209
+#define _TMC2209_STANDALONE  0x00D
+#define _TMC26X              0x10B
+#define _TMC26X_STANDALONE   0x00B
+#define _TMC2660             2660
+#define _TMC2660_STANDALONE  0x00C
+#define _TMC5160             5160
+#define _TMC5160_STANDALONE  0x00E
 
-#define A4988               0x001
-#define A5984               0x002
-#define DRV8825             0x003
-#define LV8729              0x004
-#define L6470               0x105
-#define TB6560              0x006
-#define TB6600              0x007
-#define TMC2100             0x008
-#define TMC2130             2130
-#define TMC2130_STANDALONE  0x009
-#define TMC2208             2208
-#define TMC2208_STANDALONE  0x00A
-#define TMC26X              0x10B
-#define TMC26X_STANDALONE   0x00B
-#define TMC2660             2660
-#define TMC2660_STANDALONE  0x00C
-#define TMC5160             5160
-#define TMC5160_STANDALONE  0x00D
-
-
-#define _AXIS_DRIVER_TYPE(A,T) ( defined(A##_DRIVER_TYPE) && (A##_DRIVER_TYPE == T) )
+#define _DRIVER_ID(V) _CAT(_, V)
+#define _AXIS_DRIVER_TYPE(A,T) (_DRIVER_ID(A##_DRIVER_TYPE) == _CAT(_, T))
+//#define _AXIS_DRIVER_TYPE(A,T) ( defined(A##_DRIVER_TYPE) && (A##_DRIVER_TYPE == T) )
 
 #define AXIS_DRIVER_TYPE_X(T) _AXIS_DRIVER_TYPE(X,T)
 #define AXIS_DRIVER_TYPE_Y(T) _AXIS_DRIVER_TYPE(Y,T)
@@ -88,12 +73,16 @@
 
 // Test for supported TMC drivers that require advanced configuration
 // Does not match standalone configurations
-#define HAS_TRINAMIC (HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2208)|| HAS_DRIVER(TMC2660) || HAS_DRIVER(TMC5160))
+#define HAS_TRINAMIC (HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209) || HAS_DRIVER(TMC2660) || HAS_DRIVER(TMC5160))
 
 #define AXIS_IS_TMC(A) ( AXIS_DRIVER_TYPE_##A(TMC2130) || \
                          AXIS_DRIVER_TYPE_##A(TMC2208) || \
+                         AXIS_DRIVER_TYPE_##A(TMC2209) || \
                          AXIS_DRIVER_TYPE_##A(TMC2660) || \
                          AXIS_DRIVER_TYPE_##A(TMC5160))
+                         
+#define AXIS_HAS_UART(A) (    AXIS_DRIVER_TYPE(A,TMC2208) \
+                           || AXIS_DRIVER_TYPE(A,TMC2209) )                         
 
 #endif // _DRIVERS_H_
 

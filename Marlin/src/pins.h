@@ -265,6 +265,8 @@
   #include "pins_5DPRINT.h"           // AT90USB1286                                ?env:at90USB1286_DFU
 #elif MB(FYSETC_F6_13)
   #include "pins_FYSETC_F6_13.h"
+#elif MB(FYSETC_F6_14)
+  #include "pins_FYSETC_F6_14.h"
 #else
   #error "Unknown MOTHERBOARD value set in Configuration.h"
 #endif

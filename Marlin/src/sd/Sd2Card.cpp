@@ -26,7 +26,7 @@
  *
  * This file is part of the Arduino Sd2Card Library
  */
-#include "..\MarlinConfig.h"
+#include "../MarlinConfig.h"
 
 
 #if ENABLED(SDSUPPORT) && DISABLED(USB_FLASH_DRIVE_SUPPORT)  && DISABLED(SDIO_SUPPORT)
