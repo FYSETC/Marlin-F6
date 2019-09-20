@@ -28,8 +28,8 @@
   #error "Oops!  Make sure you have 'FYSETC_F6' selected from the 'Tools -> Boards' menu."
 #endif
 
-#if MB(FYSETC_F6_13)
-  #define BOARD_NAME "FYSETC_F6_13"
+#if MB(FYSETC_F6_14)
+  #define BOARD_NAME "FYSETC_F6_14"
 #endif
 
 
