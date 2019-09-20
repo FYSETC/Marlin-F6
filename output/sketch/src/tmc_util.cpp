@@ -78,7 +78,7 @@
       return data;
     }
   #endif
-  #if HAS_DRIVER(TMC2208)
+  #if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
     #if ENABLED(TMC_DEBUG)
       static uint32_t get_pwm_scale(TMC2208Stepper &st) { return st.pwm_scale_sum(); }
       static uint8_t get_status_response(TMC2208Stepper &st, uint32_t drv_status) {
@@ -119,20 +119,21 @@
       constexpr uint8_t OT_bp = 1;
       TMC_driver_data data;      
       
-      st.rdsel(0b01); // geo-f:add 20190109
+      // st.rdsel(0b01); // geo-f : stall detected test
       
       data.drv_status = st.DRVSTATUS();
       data.is_otpw = (data.drv_status & OTPW_bm) >> OTPW_bp;
       data.is_ot = (data.drv_status & OT_bm) >> OT_bp;
-      if(data.drv_status&0x01) SERIAL_ECHOLNPGM(" stall detected"); // geo-f:add 20190109
 
-/*
-      // geo-f:20190109
+      // if(data.drv_status&0x01) SERIAL_ECHOLNPGM(" stall detected"); // geo-f : stall detected test
+
+      /*
+      // geo-f : stall detected test
       struct READ_RDSEL01_t *pr;
       pr = (struct READ_RDSEL01_t*)&data.drv_status;
       uint16_t sg_result = pr->sg_result;
       SERIAL_ECHOPAIR("sg:", sg_result);
-*/
+      */
       
       return data;
     }
@@ -229,7 +230,7 @@
     #endif
   }
 
-  #define HAS_HW_COMMS(ST) AXIS_DRIVER_TYPE(ST, TMC2130) || AXIS_DRIVER_TYPE(ST, TMC2660) || (AXIS_DRIVER_TYPE(ST, TMC2208) && defined(ST##_HARDWARE_SERIAL))
+  #define HAS_HW_COMMS(ST) AXIS_DRIVER_TYPE(ST, TMC2130) || AXIS_DRIVER_TYPE(ST, TMC2660) || (AXIS_HAS_UART(ST) && defined(ST##_HARDWARE_SERIAL))
 
   void monitor_tmc_driver() {
     static millis_t next_poll = 0;
@@ -302,6 +303,7 @@
 
   enum TMC_debug_enum : char {
     TMC_CODES,
+    TMC_UART_ADDR,
     TMC_ENABLED,
     TMC_CURRENT,
     TMC_RMS_CURRENT,
@@ -397,7 +399,7 @@
     }
   #endif
 
-  #if HAS_DRIVER(TMC2208)
+  #if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
     static void tmc_status(TMC2208Stepper &st, const TMC_debug_enum i) {
       switch (i) {
         case TMC_PWM_SCALE: SERIAL_PRINT(st.pwm_scale_sum(), DEC); break;
@@ -407,6 +409,21 @@
         default: break;
       }
     }
+
+    #if HAS_DRIVER(TMC2209)
+      template<char AXIS_LETTER, char DRIVER_ID>
+      static void tmc_status(TMCMarlin<TMC2209Stepper, AXIS_LETTER, DRIVER_ID> &st, const TMC_debug_enum i) {
+        switch (i) {
+          case TMC_SGT:       SERIAL_PRINT(st.SGTHRS(), DEC); break;
+          case TMC_UART_ADDR: SERIAL_PRINT(st.get_address(), DEC); break;
+          default:
+            TMC2208Stepper *parent = &st;
+            tmc_status(*parent, i);
+            break;
+        }
+      }
+    #endif
+    
     static void _tmc_parse_drv_status(TMC2208Stepper &st, const TMC_drv_status_enum i) {
       switch (i) {
         case TMC_T157: if (st.t157()) SERIAL_CHAR('X'); break;
@@ -677,6 +694,9 @@
     #define TMC_REPORT(LABEL, ITEM) do{ SERIAL_ECHOPGM(LABEL);  tmc_debug_loop(ITEM, print_x, print_y, print_z, print_e); }while(0)
     #define DRV_REPORT(LABEL, ITEM) do{ SERIAL_ECHOPGM(LABEL); drv_status_loop(ITEM, print_x, print_y, print_z, print_e); }while(0)
     TMC_REPORT("\t",                 TMC_CODES);
+    #if HAS_DRIVER(TMC2209)
+      TMC_REPORT("Address\t",        TMC_UART_ADDR);
+    #endif
     TMC_REPORT("Enabled\t",          TMC_ENABLED);
     TMC_REPORT("Set current",        TMC_CURRENT);
     TMC_REPORT("RMS current",        TMC_RMS_CURRENT);
@@ -715,7 +735,7 @@
     DRV_REPORT("s2ga\t",             TMC_S2GA);
     DRV_REPORT("otpw\t",             TMC_DRV_OTPW);
     DRV_REPORT("ot\t",               TMC_OT);
-    #if HAS_DRIVER(TMC2208)
+    #if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
       DRV_REPORT("157C\t",           TMC_T157);
       DRV_REPORT("150C\t",           TMC_T150);
       DRV_REPORT("143C\t",           TMC_T143);
@@ -739,7 +759,7 @@
       }
     }
   #endif
-  #if HAS_DRIVER(TMC2208)
+  #if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
     static void tmc_get_ic_registers(TMC2208Stepper, const TMC_get_registers_enum) { SERIAL_CHAR('\t'); }
   #endif
 
@@ -884,6 +904,14 @@
     st.diag1_stall(false);
   }
   #endif
+
+  bool tmc_enable_stallguard(TMC2209Stepper &st) {
+    st.TCOOLTHRS(0xFFFFF);
+    return true;
+  }
+  void tmc_disable_stallguard(TMC2209Stepper &st, const bool restore_stealth) {
+    st.TCOOLTHRS(0);
+  }
 
 #endif // USE_SENSORLESS
 

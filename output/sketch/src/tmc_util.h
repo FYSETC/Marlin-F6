@@ -135,7 +135,7 @@ class TMCMarlin<TMC2208Stepper, AXIS_LETTER, DRIVER_ID> : public TMC2208Stepper,
     TMCMarlin(Stream * SerialPort, float RS, bool has_rx=true) :
       TMC2208Stepper(SerialPort, RS, has_rx=true)
       {}
-    TMCMarlin(uint16_t RX, uint16_t TX, float RS, bool has_rx=true) :
+    TMCMarlin(uint16_t RX, uint16_t TX, float RS, const uint8_t, bool has_rx=true) :
       TMC2208Stepper(RX, TX, RS, has_rx=true)
       {}
     uint16_t rms_current() { return TMC2208Stepper::rms_current(); }
@@ -147,6 +147,44 @@ class TMCMarlin<TMC2208Stepper, AXIS_LETTER, DRIVER_ID> : public TMC2208Stepper,
       this->val_mA = mA;
       TMC2208Stepper::rms_current(mA, mult);
     }
+};
+
+template<char AXIS_LETTER, char DRIVER_ID>
+class TMCMarlin<TMC2209Stepper, AXIS_LETTER, DRIVER_ID> : public TMC2209Stepper, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
+  public:
+    TMCMarlin(Stream * SerialPort, const float RS, const uint8_t addr) :
+      TMC2209Stepper(SerialPort, RS, addr)
+      {}
+    TMCMarlin(const uint16_t RX, const uint16_t TX, const float RS, const uint8_t addr, const bool) :
+      TMC2209Stepper(RX, TX, RS, addr)
+      {}
+    uint8_t get_address() { return slave_address; }
+    uint16_t rms_current() { return TMC2209Stepper::rms_current(); }
+    inline void rms_current(const uint16_t mA) {
+      this->val_mA = mA;
+      TMC2209Stepper::rms_current(mA);
+    }
+    inline void rms_current(const uint16_t mA, const float mult) {
+      this->val_mA = mA;
+      TMC2209Stepper::rms_current(mA, mult);
+    }
+    
+    #if USE_SENSORLESS
+      inline int16_t sgt() { return TMC2209Stepper::SGTHRS(); }
+      void sgt(int16_t sgt_val) {
+        sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
+        TMC2209Stepper::SGTHRS(sgt_val);
+      }
+
+      inline int16_t homing_threshold() { return TMC2209Stepper::SGTHRS(); }
+      void homing_threshold(int16_t sgt_val) {
+        sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
+        TMC2209Stepper::SGTHRS(sgt_val);
+      }
+    #endif
+
+    static constexpr uint8_t sgt_min = 0,
+                             sgt_max = 255;
 };
 
 constexpr uint16_t _tmc_thrs(const uint16_t msteps, const int32_t thrs, const uint32_t spmm) {
@@ -232,7 +270,12 @@ void test_tmc_connection(const bool test_x, const bool test_y, const bool test_z
     bool tmc_enable_stallguard(TMC2130Stepper &st);
     void tmc_disable_stallguard(TMC2130Stepper &st, const bool restore_stealth);
   #endif
-/*
+
+  
+  bool tmc_enable_stallguard(TMC2209Stepper &st);
+  void tmc_disable_stallguard(TMC2209Stepper &st, const bool restore_stealth);
+  
+  /*
   #if HAS_DRIVER(TMC2660)
     template <char AXIS_LETTER, char DRIVER_ID>
       bool tmc_enable_stallguard(TMCMarlin<TMC2660Stepper, AXIS_LETTER, DRIVER_ID> &st);

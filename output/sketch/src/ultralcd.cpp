@@ -148,7 +148,11 @@ uint16_t max_display_update_time = 0;
   constexpr int8_t menu_bottom = LCD_HEIGHT - (TALL_FONT_CORRECTION);
 
   // Initialized by settings.load()
-  int16_t lcd_preheat_hotend_temp[2], lcd_preheat_bed_temp[2], lcd_preheat_fan_speed[2];
+  // int16_t lcd_preheat_hotend_temp[2], lcd_preheat_bed_temp[2], lcd_preheat_fan_speed[2];
+  int16_t lcd_preheat_hotend_temp[2] = { PREHEAT_1_TEMP_HOTEND , PREHEAT_2_TEMP_HOTEND };
+  int16_t lcd_preheat_bed_temp[2] = { PREHEAT_1_TEMP_BED , PREHEAT_2_TEMP_BED };
+  int16_t lcd_preheat_fan_speed[2] = { PREHEAT_1_FAN_SPEED , PREHEAT_2_FAN_SPEED};
+  
 
   #if ENABLED(AUTO_BED_LEVELING_UBL) || ENABLED(G26_MESH_VALIDATION)
     bool lcd_external_control; // = false
@@ -1582,7 +1586,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
    * "Prepare" submenu items
    *
    */
-  void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb, const int16_t fan) {
+  void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb, const int16_t fan) {    
     if (temph > 0) thermalManager.setTargetHotend(MIN(heater_maxtemp[endnum], temph), endnum);
     #if HAS_HEATED_BED
       if (tempb >= 0) thermalManager.setTargetBed(tempb);

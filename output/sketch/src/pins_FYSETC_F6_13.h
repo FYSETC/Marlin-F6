@@ -104,7 +104,7 @@
 #define E2_TMC2130_DIAG    -1
 
 
-#if HAS_DRIVER(TMC2208)
+#if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
   /**
    * TMC2208 stepper drivers
    *
@@ -125,7 +125,7 @@
 
   /**
   * Software serial
-  */
+  */  
   #define X_SERIAL_RX_PIN       -1 //71
   #define X_SERIAL_TX_PIN       72
   #define Y_SERIAL_RX_PIN       -1 //73
@@ -137,7 +137,7 @@
   #define E1_SERIAL_RX_PIN      -1 //80
   #define E1_SERIAL_TX_PIN      81
   #define E2_SERIAL_RX_PIN      -1 //22
-  #define E2_SERIAL_TX_PIN      83 
+  #define E2_SERIAL_TX_PIN      83   
 #endif
 
 //

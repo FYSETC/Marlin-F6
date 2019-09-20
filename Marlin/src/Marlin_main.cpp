@@ -12920,7 +12920,7 @@ void process_parsed_command() {
         #endif
       #endif
 
-      #if HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2208)
+      #if HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
         #if ENABLED(TMC_DEBUG)
           case 122: gcode_M122(); break;                          // M122: Debug TMC steppers
         #endif
@@ -12938,13 +12938,12 @@ void process_parsed_command() {
         #endif
       #endif
 
-      // gf:add 20190121
+      // geo-f: for debug
       /*
       case 997: {
         reset_stepper_drivers();
       }break;      
 
-      // gf:add 20190121
       case 998: {
         tmc_enable_stealthChop(stepperX);
         tmc_enable_stealthChop(stepperY);
@@ -14779,8 +14778,8 @@ void setup() {
     #endif
     tmc_init_cs_pins();
   #endif
-  #if HAS_DRIVER(TMC2208)
-    tmc2208_serial_begin();
+  #if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
+    tmc_serial_begin();
   #endif
 
   // Check startup - does nothing if bootloader sets MCUSR to 0

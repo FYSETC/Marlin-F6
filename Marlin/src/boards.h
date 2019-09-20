@@ -157,6 +157,7 @@
 #define BOARD_5DPRINT           88    // 5DPrint D8 Driver Board
 
 #define BOARD_FYSETC_F6_13      541
+#define BOARD_FYSETC_F6_14      542
 
 #define MB(board) (defined(BOARD_##board) && MOTHERBOARD==BOARD_##board)
 

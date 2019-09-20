@@ -190,13 +190,13 @@ typedef struct SettingsDataStruct {
           lcd_preheat_fan_speed[2];                     // M145 S0 F
   
   #if ENABLED(FYSTLCD_V1)
-  int16_t lcd_preheat_hotend_temp[FILAMENT_OPE_CHOICES],                   // M145 S0 H
-          lcd_preheat_bed_temp[FILAMENT_OPE_CHOICES],                      // M145 S0 B
-          lcd_preheat_fan_speed[FILAMENT_OPE_CHOICES];                     // M145 S0 F
+    int16_t lcd_preheat_hotend_temp[FILAMENT_OPE_CHOICES],                   // M145 S0 H
+            lcd_preheat_bed_temp[FILAMENT_OPE_CHOICES],                      // M145 S0 B
+            lcd_preheat_fan_speed[FILAMENT_OPE_CHOICES];                     // M145 S0 F
   #else
-  int16_t lcd_preheat_hotend_temp[2],                   // M145 S0 H
-          lcd_preheat_bed_temp[2],                      // M145 S0 B
-          lcd_preheat_fan_speed[2];                     // M145 S0 F
+    int16_t lcd_preheat_hotend_temp[2],                   // M145 S0 H
+            lcd_preheat_bed_temp[2],                      // M145 S0 B
+            lcd_preheat_fan_speed[2];                     // M145 S0 F
   #endif    
   */
   
@@ -621,8 +621,6 @@ void MarlinSettings::postprocess() {
     EEPROM_WRITE(lcd_preheat_hotend_temp);
     EEPROM_WRITE(lcd_preheat_bed_temp);
     EEPROM_WRITE(lcd_preheat_fan_speed);
-    _FIELD_TEST(lcd_preheat_bed_temp);//gf
-    _FIELD_TEST(lcd_preheat_fan_speed); //gf
     */
 
     for (uint8_t e = 0; e < MAX_EXTRUDERS; e++) {

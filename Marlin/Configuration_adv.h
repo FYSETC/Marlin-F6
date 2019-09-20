@@ -763,7 +763,7 @@
  *
  * Warning: Does not respect endstops!
  */
-//#define BABYSTEPPING
+#define BABYSTEPPING
 #if ENABLED(BABYSTEPPING)
   //#define BABYSTEP_XY              // Also enable X/Y Babystepping. Not supported on DELTA!
   #define BABYSTEP_INVERT_Z false    // Change if Z babysteps should go the other way
@@ -997,7 +997,7 @@
  * Requires NOZZLE_PARK_FEATURE.
  * This feature is required for the default FILAMENT_RUNOUT_SCRIPT.
  */
-#define ADVANCED_PAUSE_FEATURE
+//#define ADVANCED_PAUSE_FEATURE
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
   #define PAUSE_PARK_RETRACT_FEEDRATE         60  // (mm/s) Initial retract feedrate.
   #define PAUSE_PARK_RETRACT_LENGTH            2  // (mm) Initial retract.
@@ -1173,8 +1173,8 @@
   #define E4_CURRENT         800
   #define E4_MICROSTEPS       16
 
-  #define E5_CURRENT         800 //geo-f:add
-  #define E5_MICROSTEPS       16 //geo-f:add
+  #define E5_CURRENT         800
+  #define E5_MICROSTEPS       16
   
   /**
    * Use software SPI for TMC2130.
@@ -1187,20 +1187,39 @@
   //#define TMC_SW_SCK        -1
 
   /**
+     * Four TMC2209 drivers can use the same HW/SW serial port with hardware configured addresses.
+     * Set the address using jumpers on pins MS1 and MS2.
+     * Address | MS1  | MS2
+     *       0 | LOW  | LOW
+     *       1 | HIGH | LOW
+     *       2 | LOW  | HIGH
+     *       3 | HIGH | HIGH
+     */
+  #define  X_SLAVE_ADDRESS 0
+  #define  Y_SLAVE_ADDRESS 0
+  #define  Z_SLAVE_ADDRESS 0
+  #define X2_SLAVE_ADDRESS 0
+  #define Y2_SLAVE_ADDRESS 0
+  #define Z2_SLAVE_ADDRESS 0
+  #define E0_SLAVE_ADDRESS 0
+  #define E1_SLAVE_ADDRESS 0
+  #define E2_SLAVE_ADDRESS 0
+  #define E3_SLAVE_ADDRESS 0
+  #define E4_SLAVE_ADDRESS 0
+
+  /**
    * Use Trinamic's ultra quiet stepping mode.
    * When disabled, Marlin will use spreadCycle stepping mode.
    */
-#if HAS_DRIVER(TMC2130)||HAS_DRIVER(TMC5160)
   #define STEALTHCHOP
   #if ENABLED(STEALTHCHOP)
     #define STEALTHCHOP_XY 
     #define STEALTHCHOP_Z  
     #define STEALTHCHOP_E  
   #endif
-#endif
 
 
-  // gf:add
+  // geo-f : add CHOPPER_TIMING
   /**
    * Optimize spreadCycle chopper parameters by using predefined parameter sets
    * or with the help of an example included in the library.
@@ -1215,7 +1234,7 @@
    * Define you own with
    * { <off_time[1..15]>, <hysteresis_end[-3..12]>, hysteresis_start[1..8] }
    */
-#define CHOPPER_TIMING CHOPPER_DEFAULT_12V
+  #define CHOPPER_TIMING CHOPPER_DEFAULT_12V
 
   /**
    * Monitor Trinamic TMC2130 and TMC2208 drivers for error conditions,
@@ -1268,7 +1287,7 @@
    * It is advised to set X/Y/Z_HOME_BUMP_MM to 0.
    * M914 X/Y/Z to live tune the setting
    */
-  //#define SENSORLESS_HOMING // TMC2130 and TMC5160
+  //#define SENSORLESS_HOMING // TMC2130 TMC2209 and TMC5160
   #if ENABLED(SENSORLESS_HOMING) || ENABLED(SENSORLESS_PROBING)
     #define X_STALL_SENSITIVITY  8
     #define Y_STALL_SENSITIVITY  8

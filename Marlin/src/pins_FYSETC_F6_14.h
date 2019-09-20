@@ -28,8 +28,8 @@
   #error "Oops!  Make sure you have 'FYSETC_F6' selected from the 'Tools -> Boards' menu."
 #endif
 
-#if MB(FYSETC_F6_13)
-  #define BOARD_NAME "FYSETC_F6_13"
+#if MB(FYSETC_F6_14)
+  #define BOARD_NAME "FYSETC_F6_14"
 #endif
 
 
@@ -43,11 +43,11 @@
 // Limit Switches
 //
 #define X_MIN_PIN          63
-#define X_MAX_PIN          -1 //64
+#define X_MAX_PIN          64
 #define Y_MIN_PIN          14
 #define Y_MAX_PIN          15
 #define Z_MIN_PIN          12
-#define Z_MAX_PIN          9
+#define Z_MAX_PIN          2
 
 //
 // Z Probe (when not Z_MIN_PIN)
@@ -125,19 +125,19 @@
 
   /**
   * Software serial
-  */  
-  #define X_SERIAL_RX_PIN       -1 //71
-  #define X_SERIAL_TX_PIN       72
-  #define Y_SERIAL_RX_PIN       -1 //73
-  #define Y_SERIAL_TX_PIN       75
-  #define Z_SERIAL_RX_PIN       -1 //78
+  */    
+  #define X_SERIAL_RX_PIN       72
+  #define X_SERIAL_TX_PIN       71
+  #define Y_SERIAL_RX_PIN       73
+  #define Y_SERIAL_TX_PIN       78
+  #define Z_SERIAL_RX_PIN       75
   #define Z_SERIAL_TX_PIN       79
-  #define E0_SERIAL_RX_PIN      -1 //76
-  #define E0_SERIAL_TX_PIN      77
-  #define E1_SERIAL_RX_PIN      -1 //80
-  #define E1_SERIAL_TX_PIN      81
-  #define E2_SERIAL_RX_PIN      -1 //22
-  #define E2_SERIAL_TX_PIN      83   
+  #define E0_SERIAL_RX_PIN      77
+  #define E0_SERIAL_TX_PIN      81
+  #define E1_SERIAL_RX_PIN      76
+  #define E1_SERIAL_TX_PIN      80
+  #define E2_SERIAL_RX_PIN      62
+  #define E2_SERIAL_TX_PIN      82
 #endif
 
 //
@@ -252,17 +252,14 @@
   #endif
 #endif
 
-
-
-
 #if ENABLED(FYS_STORAGE_SUPPORT)
-#define CH376_SPI_MOSI_PIN  51       // SPI Master Out Slave In pin
-#define CH376_SPI_MISO_PIN  50       // SPI Master In Slave Out pin
-#define CH376_SPI_SCK_PIN   52        // SPI Clock pin
-#define CH376_SPI_SS_PIN    53
-#define CH376_INT_PIN       31
-#define CH376_BUSY_PIN      33
-#define CH376_RESET_PIN     49
+  #define CH376_SPI_MOSI_PIN  51       // SPI Master Out Slave In pin
+  #define CH376_SPI_MISO_PIN  50       // SPI Master In Slave Out pin
+  #define CH376_SPI_SCK_PIN   52       // SPI Clock pin
+  #define CH376_SPI_SS_PIN    53
+  #define CH376_INT_PIN       31
+  #define CH376_BUSY_PIN      33
+  #define CH376_RESET_PIN     49
 #endif
 
 
